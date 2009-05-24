@@ -20,7 +20,24 @@
 	do {							\
 		(arr).nr = (arr).alloc = 0;			\
 		free((arr).elts);				\
+		(arr).elts = NULL;				\
 	} while (0)
+
+#define ARR_RESERVE(arr, sz)					\
+	do {							\
+		if ((sz) > (arr).alloc) {			\
+			(arr).alloc = (sz);			\
+			(arr).elts = realloc((arr).elts,	\
+					     (arr).alloc * sizeof(*(arr).elts)); \
+		}						\
+	} while (0)
+
+#define ARR_RESIZE(arr, sz)					\
+	do {							\
+		ARR_RESERVE(arr, sz);				\
+		(arr).nr = (sz);				\
+	} while (0)
+
 
 #define ARR_SIZE(arr)			((arr).nr)
 
@@ -30,11 +47,8 @@
 
 #define ARR_PUSH(arr, elt)					\
 	do {							\
-		if ((arr).nr == (arr).alloc) {			\
-			(arr).alloc *= 2;			\
-			(arr).elts = realloc((arr).elts,	\
-					     (arr).alloc * sizeof(*(arr).elts)); \
-		}						\
+		if ((arr).nr == (arr).alloc)			\
+			ARR_RESERVE(arr, 2 * (arr).alloc);	\
 		(arr).elts[(arr).nr++] = elt;			\
 	} while (0)
 

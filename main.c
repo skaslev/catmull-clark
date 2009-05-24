@@ -50,7 +50,6 @@ static void draw_scene(void)
 	glLightfv(GL_LIGHT0, GL_POSITION,
 		  (GLfloat []) { cam_pos.x, cam_pos.y, cam_pos.z, 1.0f });
 	glEnable(GL_LIGHT0);
-	glShadeModel(GL_FLAT);
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
 	glColor3f(1.0f, 1.0f, 1.0f);

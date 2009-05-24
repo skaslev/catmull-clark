@@ -1,26 +1,23 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "arr.h"
-
-struct mesh {
-	ARR_DEF(struct vec, verts);
-	ARR_DEF(int, idxs);
-};
-
-struct mesh *mesh_create();
-void mesh_destroy(struct mesh *m);
+struct mesh;
 
 struct mesh *mesh_read_obj(const char *file);
 
-void mesh_add_vertex(struct mesh *m, const struct vec *vert);
-void mesh_begin_face(struct mesh *m);
-void mesh_add_index(struct mesh *m, int idx);
-void mesh_end_face(struct mesh *m);
+struct mesh *mesh_create();
+void mesh_destroy(struct mesh *mesh);
 
-void mesh_calc_bounds(const struct mesh *m,
+void mesh_add_vertex(struct mesh *mesh, const struct vec *v);
+void mesh_add_normal(struct mesh *mesh, const struct vec *n);
+void mesh_begin_face(struct mesh *mesh);
+void mesh_add_index(struct mesh *mesh, int vi, int ni);
+void mesh_end_face(struct mesh *mesh);
+void mesh_compute_normals(struct mesh *mesh);
+
+void mesh_calc_bounds(const struct mesh *mesh,
 		      struct vec *min, struct vec *max);
 
-void mesh_render(const struct mesh *m);
+void mesh_render(const struct mesh *mesh);
 
 #endif
