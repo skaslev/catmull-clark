@@ -3,7 +3,6 @@
 #include <math.h>
 #include <GL/gl.h>
 #include "arr.h"
-#include "util.h"
 #include "geometry.h"
 #include "mesh.h"
 
@@ -138,9 +137,9 @@ struct mesh *mesh_read_obj(const char *file)
 
 	mesh = mesh_create();
 	while (!feof(f)) {
-		if (!fgets(line, ARRAY_SIZE(line), f))
+		if (!fgets(line, sizeof(line), f))
 			break;
-		
+
 		str = line;
 		if (strncmp(str, "v ", 2) == 0) {
 			/* Vertex command */
