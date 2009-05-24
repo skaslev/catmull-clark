@@ -1,4 +1,3 @@
-* DONE Add normals to mesh.c (redesign?)
-* TODO Add focusing support in main.c
-* TODO Catmull-Clark subdivision (mesh -> mesh)
-* TODO Mesh editing support
+* Add camera focusing support
+* Catmull-Clark subdivision (mesh -> mesh)
+* Mesh editing support

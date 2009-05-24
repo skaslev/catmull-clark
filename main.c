@@ -1,15 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glut.h>
-
 #include "geometry.h"
 #include "mesh.h"
 
 static struct mesh *mesh;
 
-static struct vec cam_pos = { 0.0f, 0.0f, 5.0f };
-static struct vec cam_at  = { 0.0f, 0.0f, 0.0f };
-static struct vec cam_up  = { 0.0f, 1.0f, 0.0f };
+static struct vec center = { 0.0, 0.0, 0.0 };
+static float focal_len = 5.0f;
+static float y_rot = 0.0f, x_rot = 0.0f;
 
 static float fovy  = 90.0f;
 static float znear = 0.1f, zfar = 1000.0f;
@@ -18,8 +17,40 @@ static GLint width = 1024, height = 1024;
 static enum { NONE, ROTATING, PANNING, ZOOMING } cur_op = NONE;
 static int last_x, last_y;
 
+static void
+get_camera_frame(struct vec *x, struct vec *y, struct vec *z)
+{
+	mat_t m;
+
+	*x = (struct vec) { 1.0f, 0.0f, 0.0f };
+	*y = (struct vec) { 0.0f, 1.0f, 0.0f };
+	*z = (struct vec) { 0.0f, 0.0f, 1.0f };
+
+	mat_rot(m, y, y_rot);
+	mat_mul_vector(x, m, x);
+	mat_mul_vector(z, m, z);
+
+	mat_rot(m, x, x_rot);
+	mat_mul_vector(y, m, y);
+	mat_mul_vector(z, m, z);
+}
+
+static inline void
+get_camera(struct vec *eye, struct vec *at, struct vec *up)
+{
+	struct vec x, y, z;
+
+	get_camera_frame(&x, &y, &z);
+	*eye = *at = center;
+	vec_mad(eye, focal_len, &z);
+	*up = y;
+}
+
 static void draw_frame(void)
 {
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+
 	glBegin(GL_LINES);
 
 	/* Draw the x axis */
@@ -38,21 +69,14 @@ static void draw_frame(void)
 	glVertex3f(0.0f, 0.0f, 1.0f);
 
 	glEnd();
+
+	glPopAttrib();
 }
 
 static void draw_scene(void)
 {
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-	glEnable(GL_LIGHTING);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE,
-		  (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
-	glLightfv(GL_LIGHT0, GL_POSITION,
-		  (GLfloat []) { cam_pos.x, cam_pos.y, cam_pos.z, 1.0f });
-	glEnable(GL_LIGHT0);
-
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
-	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glPushMatrix();
 	glTranslatef(0.0, 0.0, -5.0);
@@ -71,6 +95,8 @@ static void draw_scene(void)
 
 static void display(void)
 {
+	struct vec eye, at, up;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_PROJECTION);
@@ -78,9 +104,15 @@ static void display(void)
 	gluPerspective(fovy, (double) width / height, znear, zfar);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(cam_pos.x, cam_pos.y, cam_pos.z,
-		  cam_at.x,  cam_at.y,  cam_at.z,
-		  cam_up.x,  cam_up.y,  cam_up.z);
+	get_camera(&eye, &at, &up);
+	gluLookAt(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.z);
+
+	glEnable(GL_LIGHTING);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,
+		  (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
+	glLightfv(GL_LIGHT0, GL_POSITION,
+		  (GLfloat []) { eye.x, eye.y, eye.z, 1.0f });
+	glEnable(GL_LIGHT0);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -135,53 +167,28 @@ static void mouse(int button, int state, int x, int y)
 	last_y = y;
 }
 
-static void
-rotate_point(struct vec *r, const struct vec *p,
-	     const struct vec *o, const struct vec *v, float alpha)
-{
-	mat_t m;
-	mat_rot(m, v, alpha);
-
-	vec_sub(r, p, o);
-	mat_mul_point(r, m, r);
-	vec_add(r, r, o);
-}
-
 static void motion(int x, int y)
 {
-	struct vec dir_x, dir_y, dir_z;
-	float focal_len, dx, dy;
-
-	focal_len = vec_dist(&cam_at, &cam_pos);
-	vec_sub(&dir_z, &cam_at, &cam_pos);
-	vec_div(&dir_z, focal_len);
-	vec_prod(&dir_x, &cam_up, &dir_z);
-	vec_prod(&dir_y, &dir_z, &dir_x);
+	float dx, dy;
 
 	dx = (float) (x - last_x) / width;
 	dy = (float) (y - last_y) / height;
 
 	if (cur_op == ROTATING) {
-		rotate_point(&cam_pos, &cam_pos, &cam_at, &dir_y, -dx * M_PI);
-		rotate_point(&cam_pos, &cam_pos, &cam_at, &dir_x, dy * M_PI);
-
-		/* vec_add(&cam_up, &cam_up, &cam_at); */
-		/* rotate_point(&cam_up, &cam_up, &cam_at, &dir_x, dy * M_PI); */
-		/* vec_sub(&cam_up, &cam_up, &cam_at); */
+		y_rot -= dx * 2.0f * M_PI;
+		x_rot -= dy * 2.0f * M_PI;
 	} else if (cur_op == PANNING) {
 		float lx, ly;
-		struct vec d = { 0.0, 0.0, 0.0 };
+		struct vec x, y, z;
 
 		ly = 2.0f * focal_len * tan(fovy / 2.0f * DEGREE);
 		lx = ly * width / height;
 
-		vec_mad(&d, dx * lx, &dir_x);
-		vec_mad(&d, dy * ly, &dir_y);
-
-		vec_add(&cam_pos, &cam_pos, &d);
-		vec_add(&cam_at, &cam_at, &d);
+		get_camera_frame(&x, &y, &z);
+		vec_mad(&center, -dx * lx, &x);
+		vec_mad(&center,  dy * ly, &y);
 	} else if (cur_op == ZOOMING) {
-		vec_mad(&cam_pos, focal_len * dy, &dir_z);
+		focal_len *= 1.0f - dy;
 	}
 
 	last_x = x;
@@ -199,7 +206,9 @@ int main(int argc, char **argv)
 
 	mesh = mesh_read_obj("objs/bigguy_00.obj");
 	mesh_calc_bounds(mesh, &min, &max);
-	cam_pos.z = 2.0f * max.y;
+	vec_add(&center, &min, &max);
+	vec_div(&center, 2.0f);
+	focal_len = 2.0f * max.y;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
