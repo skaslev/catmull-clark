@@ -3,9 +3,7 @@
 
 struct mesh;
 
-struct mesh *mesh_read_obj(const char *file);
-
-struct mesh *mesh_create();
+struct mesh *mesh_create(void);
 void mesh_destroy(struct mesh *mesh);
 
 void mesh_add_vertex(struct mesh *mesh, const struct vec *v);

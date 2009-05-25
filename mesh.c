@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <ctype.h>
 #include <math.h>
 #include <GL/gl.h>
 #include "arr.h"
@@ -17,7 +15,7 @@ struct mesh {
 	ARR_DEF(int, faces);
 };
 
-struct mesh *mesh_create()
+struct mesh *mesh_create(void)
 {
 	struct mesh *mesh = malloc(sizeof(*mesh));
 	ARR_INIT(mesh->vbuf);
@@ -55,7 +53,6 @@ void mesh_add_index(struct mesh *mesh, int vi, int ni)
 {
 	ARR_PUSH(mesh->ibuf, ((struct idx) { vi, ni }));
 }
-
 
 void mesh_end_face(struct mesh *mesh)
 {
@@ -108,73 +105,6 @@ void mesh_compute_normals(struct mesh *mesh)
 		struct idx *idx = &ARR_AT(mesh->ibuf, i);
 		idx->ni = idx->vi;
 	}
-}
-
-static inline const char *skip_space(const char *str)
-{
-	while (*str && isspace(*str))
-		str++;
-	return str;
-}
-
-static inline const char *skip_non_space(const char *str)
-{
-	while (*str && !isspace(*str))
-		str++;
-	return str;
-}
-
-struct mesh *mesh_read_obj(const char *file)
-{
-	FILE *f;
-	char line[512];
-	const char *str;
-	struct mesh *mesh;
-	int has_normals = 0;
-
-	if (!(f = fopen(file, "r")))
-		return NULL;
-
-	mesh = mesh_create();
-	while (!feof(f)) {
-		if (!fgets(line, sizeof(line), f))
-			break;
-
-		str = line;
-		if (strncmp(str, "v ", 2) == 0) {
-			/* Vertex command */
-			struct vec v;
-
-			sscanf(str, "v %f %f %f", &v.x, &v.y, &v.z);
-			mesh_add_vertex(mesh, &v);
-		} else if (strncmp(str, "vn ", 2) == 0) {
-			/* Normal command */
-			struct vec n;
-
-			sscanf(str, "vn %f %f %f", &n.x, &n.y, &n.z);
-			mesh_add_normal(mesh, &n);
-		} else if (strncmp(str, "f ", 2) == 0) {
-			/* Face command */
-			int vi, ti, ni;
-
-			mesh_begin_face(mesh);
-			str = skip_space(++str); /* Skip 'f ' */
-			while (*str) {
-				vi = ti = ni = 0;
-				if (sscanf(str, "%d/%d/%d", &vi, &ti, &ni) == 3)
-					has_normals = 1;
-				mesh_add_index(mesh, vi - 1, ni - 1);
-				str = skip_non_space(str);
-				str = skip_space(str);
-			}
-			mesh_end_face(mesh);
-		}
-	}
-
-	if (!has_normals)
-		mesh_compute_normals(mesh);
-
-	return mesh;
 }
 
 void mesh_calc_bounds(const struct mesh *mesh,

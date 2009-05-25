@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include "geometry.h"
 #include "mesh.h"
+#include "obj.h"
 
 static struct mesh *mesh;
 
@@ -204,7 +205,7 @@ int main(int argc, char **argv)
 {
 	struct vec min, max;
 
-	mesh = mesh_read_obj("objs/bigguy_00.obj");
+	mesh = obj_read("objs/bigguy_00.obj");
 	mesh_calc_bounds(mesh, &min, &max);
 	vec_add(&center, &min, &max);
 	vec_div(&center, 2.0f);
