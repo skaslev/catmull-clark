@@ -123,6 +123,7 @@ static void display(void)
 	draw_frame();
 
 	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 static void reshape(int w, int h)
@@ -153,6 +154,13 @@ static void special(int key, int x, int y)
 
 static void mouse(int button, int state, int x, int y)
 {
+	static const int cursor[] = {
+		[NONE]     = GLUT_CURSOR_RIGHT_ARROW,
+		[ROTATING] = GLUT_CURSOR_CYCLE,
+		[PANNING]  = GLUT_CURSOR_CROSSHAIR,
+		[ZOOMING]  = GLUT_CURSOR_UP_DOWN
+	};
+
 	if ((glutGetModifiers() & GLUT_ACTIVE_ALT) && state == GLUT_DOWN) {
 		if (button == GLUT_LEFT_BUTTON)
 			cur_op = ROTATING;
@@ -163,6 +171,8 @@ static void mouse(int button, int state, int x, int y)
 	} else {
 		cur_op = NONE;
 	}
+
+	glutSetCursor(cursor[cur_op]);
 
 	last_x = x;
 	last_y = y;
