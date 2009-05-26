@@ -64,6 +64,8 @@ struct mesh *obj_read(const char *file)
 		}
 	}
 
+	fclose(f);
+
 	if (!has_normals)
 		mesh_compute_normals(mesh);
 
