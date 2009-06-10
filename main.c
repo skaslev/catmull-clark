@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include "geometry.h"
 #include "mesh.h"
+#include "meshrend.h"
 #include "obj.h"
 
 static struct mesh *mesh;
