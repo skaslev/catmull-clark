@@ -11,6 +11,12 @@ void mesh_add_normal(struct mesh *mesh, const struct vec *n);
 void mesh_begin_face(struct mesh *mesh);
 void mesh_add_index(struct mesh *mesh, int vi, int ni);
 void mesh_end_face(struct mesh *mesh);
+
+int mesh_face_count(const struct mesh *mesh);
+int mesh_face_vertex_count(const struct mesh *mesh, int face);
+struct vec *mesh_get_vertex(const struct mesh *mesh, int face, int vert);
+struct vec *mesh_get_normal(const struct mesh *mesh, int face, int vert);
+
 void mesh_compute_normals(struct mesh *mesh);
 
 void mesh_calc_bounds(const struct mesh *mesh,

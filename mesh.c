@@ -59,52 +59,78 @@ void mesh_end_face(struct mesh *mesh)
 	/* noop */
 }
 
+int mesh_face_count(const struct mesh *mesh)
+{
+	return ARR_SIZE(mesh->faces);
+}
+
+int mesh_face_vertex_count(const struct mesh *mesh, int face)
+{
+	int beg, end;
+
+	beg = ARR_AT(mesh->faces, face);
+	end = face != ARR_SIZE(mesh->faces) - 1 ?
+		ARR_AT(mesh->faces, face + 1) : ARR_SIZE(mesh->ibuf);
+	return end - beg;
+}
+
+struct vec *mesh_get_vertex(const struct mesh *mesh, int face, int vert)
+{
+	int beg, idx;
+
+	beg = ARR_AT(mesh->faces, face);
+	idx = ARR_AT(mesh->ibuf, beg + vert).vi;
+	return &ARR_AT(mesh->vbuf, idx);
+}
+
+struct vec *mesh_get_normal(const struct mesh *mesh, int face, int vert)
+{
+	int beg, idx;
+
+	beg = ARR_AT(mesh->faces, face);
+	idx = ARR_AT(mesh->ibuf, beg + vert).ni;
+	return idx != -1 ? &ARR_AT(mesh->nbuf, idx) : NULL;
+}
+
 void mesh_compute_normals(struct mesh *mesh)
 {
-	int i, j;
+	int faces, i;
 
 	ARR_RESIZE(mesh->nbuf, ARR_SIZE(mesh->vbuf));
 	memset(ARR_ELTS(mesh->nbuf), 0,
 	       ARR_SIZE(mesh->nbuf) * sizeof(*ARR_ELTS(mesh->nbuf)));
 
-	for (i = 0; i < ARR_SIZE(mesh->faces); i++) {
-		int off, len;
+	for (i = 0; i < ARR_SIZE(mesh->ibuf); i++) {
+		struct idx *idx = &ARR_AT(mesh->ibuf, i);
+		idx->ni = idx->vi;
+	}
 
-		off = ARR_AT(mesh->faces, i);
-		len = i != ARR_SIZE(mesh->faces) - 1 ?
-			ARR_AT(mesh->faces, i + 1) - off :
-			ARR_SIZE(mesh->ibuf) - off;
+	faces = mesh_face_count(mesh);
+	for (i = 0; i < faces; i++) {
+		int verts, j;
 
-		for (j = 0; j < len; j++) {
-			int idx0, idx1, idx2;
+		verts = mesh_face_vertex_count(mesh, i);
+		for (j = 0; j < verts; j++) {
 			const struct vec *v0, *v1, *v2;
 			struct vec u, v, n;
 			struct vec *vn;
 
-			idx0 = ARR_AT(mesh->ibuf, off + j).vi;
-			idx1 = ARR_AT(mesh->ibuf, off + (j + 1) % len).vi;
-			idx2 = ARR_AT(mesh->ibuf, off + (j + len - 1) % len).vi;
-			v0 = &ARR_AT(mesh->vbuf, idx0);
-			v1 = &ARR_AT(mesh->vbuf, idx1);
-			v2 = &ARR_AT(mesh->vbuf, idx2);
+			v0 = mesh_get_vertex(mesh, i, j);
+			v1 = mesh_get_vertex(mesh, i, (j + 1) % verts);
+			v2 = mesh_get_vertex(mesh, i, (j + verts - 1) % verts);
 
 			vec_sub(&u, v1, v0);
 			vec_sub(&v, v2, v0);
 			vec_prod(&n, &u, &v);
 			vec_normalize(&n);
 
-			vn = &ARR_AT(mesh->nbuf, idx0);
+			vn = mesh_get_normal(mesh, i, j);
 			vec_add(vn, vn, &n);
 		}
 	}
 
 	for (i = 0; i < ARR_SIZE(mesh->nbuf); i++)
 		vec_normalize(&ARR_AT(mesh->nbuf, i));
-
-	for (i = 0; i < ARR_SIZE(mesh->ibuf); i++) {
-		struct idx *idx = &ARR_AT(mesh->ibuf, i);
-		idx->ni = idx->vi;
-	}
 }
 
 void mesh_calc_bounds(const struct mesh *mesh,
@@ -123,27 +149,21 @@ void mesh_calc_bounds(const struct mesh *mesh,
 
 void mesh_render(const struct mesh *mesh)
 {
-	int i, j;
+	int faces, i;
 
-	for (i = 0; i < ARR_SIZE(mesh->faces); i++) {
-		int off, len;
+	faces = mesh_face_count(mesh);
+	for (i = 0; i < faces; i++) {
+		int verts, j;
 
-		off = ARR_AT(mesh->faces, i);
-		len = i != ARR_SIZE(mesh->faces) - 1 ?
-			ARR_AT(mesh->faces, i + 1) - off :
-			ARR_SIZE(mesh->ibuf) - off;
-
+		verts = mesh_face_vertex_count(mesh, i);
 		glBegin(GL_POLYGON);
-		for (j = 0; j < len; j++) {
-			struct idx *idx = &ARR_AT(mesh->ibuf, off + j);
-			struct vec *v;
+		for (j = 0; j < verts; j++) {
+			const struct vec *v;
 
-			if (idx->ni != -1) {
-				v = &ARR_AT(mesh->nbuf, idx->ni);
+			if ((v = mesh_get_normal(mesh, i, j)))
 				glNormal3f(v->x, v->y, v->z);
-			}
 
-			v = &ARR_AT(mesh->vbuf, idx->vi);
+			v = mesh_get_vertex(mesh, i, j);
 			glVertex3f(v->x, v->y, v->z);
 		}
 		glEnd();

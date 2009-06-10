@@ -76,19 +76,9 @@ static void draw_frame(void)
 
 static void draw_scene(void)
 {
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glPushAttrib(GL_LIGHTING_BIT);
+
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
-
-	glPushMatrix();
-	glTranslatef(0.0, 0.0, -5.0);
-	glutSolidTeapot(1.0);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(-5.0, -5.0, -15.0);
-	glutSolidTeapot(1.0);
-	glPopMatrix();
-
 	mesh_render(mesh);
 
 	glPopAttrib();
