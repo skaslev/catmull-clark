@@ -115,10 +115,6 @@ static void display(void)
 		  (GLfloat []) { eye.x, eye.y, eye.z, 1.0f });
 	glEnable(GL_LIGHT0);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_TRUE);
-
 	draw_scene();
 	draw_frame();
 
@@ -138,6 +134,7 @@ static void reshape(int w, int h)
 
 	glClearDepth(1.0);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glEnable(GL_DEPTH_TEST);
 }
 
 static void keyboard(unsigned char key, int x, int y)

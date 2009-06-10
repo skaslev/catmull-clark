@@ -7,9 +7,9 @@
 
 #define MAX(a, b)	((a) > (b) ? (a) : (b))
 
-#define SWAP(type, a, b)			\
+#define SWAP(a, b)				\
 	do {					\
-		type __tmp = (a);		\
+		typeof(a) __tmp = (a);		\
 		(a) = (b);			\
 		(b) = __tmp;			\
 	} while (0)
