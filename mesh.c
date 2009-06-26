@@ -57,24 +57,16 @@ void mesh_end_face(struct mesh *mesh)
 	/* noop */
 }
 
-int mesh_vertex_count(const struct mesh *mesh)
+int mesh_vertex_buffer(const struct mesh *mesh, const struct vec **buf)
 {
+	*buf = ARR_ELTS(mesh->vbuf);
 	return ARR_SIZE(mesh->vbuf);
 }
 
-int mesh_normal_count(const struct mesh *mesh)
+int mesh_normal_buffer(const struct mesh *mesh, const struct vec **buf)
 {
+	*buf = ARR_ELTS(mesh->nbuf);
 	return ARR_SIZE(mesh->nbuf);
-}
-
-const struct vec *mesh_vertex_buffer(const struct mesh *mesh)
-{
-	return ARR_ELTS(mesh->vbuf);
-}
-
-const struct vec *mesh_normal_buffer(const struct mesh *mesh)
-{
-	return ARR_ELTS(mesh->nbuf);
 }
 
 int mesh_face_count(const struct mesh *mesh)
@@ -122,30 +114,28 @@ struct vec *mesh_get_normal(const struct mesh *mesh, int face, int vert)
 
 void mesh_compute_normals(struct mesh *mesh)
 {
-	int i, faces;
+	int i, nr_faces;
 
 	ARR_RESIZE(mesh->nbuf, ARR_SIZE(mesh->vbuf));
 	memset(ARR_ELTS(mesh->nbuf), 0,
 	       ARR_SIZE(mesh->nbuf) * sizeof(*ARR_ELTS(mesh->nbuf)));
 
-	for (i = 0; i < ARR_SIZE(mesh->ibuf); i++) {
-		struct idx *idx = &ARR_AT(mesh->ibuf, i);
+	ARR_FOREACH(idx, mesh->ibuf)
 		idx->ni = idx->vi;
-	}
 
-	faces = mesh_face_count(mesh);
-	for (i = 0; i < faces; i++) {
-		int j, verts;
+	nr_faces = mesh_face_count(mesh);
+	for (i = 0; i < nr_faces; i++) {
+		int j, nr_verts;
 
-		verts = mesh_face_vertex_count(mesh, i);
-		for (j = 0; j < verts; j++) {
+		nr_verts = mesh_face_vertex_count(mesh, i);
+		for (j = 0; j < nr_verts; j++) {
 			const struct vec *v0, *v1, *v2;
 			struct vec u, v, n;
 			struct vec *vn;
 
 			v0 = mesh_get_vertex(mesh, i, j);
-			v1 = mesh_get_vertex(mesh, i, (j + 1) % verts);
-			v2 = mesh_get_vertex(mesh, i, (j + verts - 1) % verts);
+			v1 = mesh_get_vertex(mesh, i, (j + 1) % nr_verts);
+			v2 = mesh_get_vertex(mesh, i, (j + nr_verts - 1) % nr_verts);
 
 			vec_sub(&u, v1, v0);
 			vec_sub(&v, v2, v0);
@@ -157,6 +147,6 @@ void mesh_compute_normals(struct mesh *mesh)
 		}
 	}
 
-	for (i = 0; i < ARR_SIZE(mesh->nbuf); i++)
-		vec_normalize(&ARR_AT(mesh->nbuf, i));
+	ARR_FOREACH(n, mesh->nbuf)
+		vec_normalize(n);
 }

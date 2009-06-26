@@ -16,6 +16,12 @@
 		(arr).elts = malloc((arr).alloc * sizeof(*(arr).elts)); \
 	} while (0)
 
+#define ARR_INIT2(arr, sz)					\
+	do {							\
+		(arr).nr = (arr).alloc = (sz);			\
+		(arr).elts = malloc((arr).alloc * sizeof(*(arr).elts)); \
+	} while (0)
+
 #define ARR_CLEAR(arr)						\
 	do {							\
 		(arr).nr = (arr).alloc = 0;			\
@@ -51,5 +57,9 @@
 			ARR_RESERVE(arr, 2 * (arr).alloc);	\
 		(arr).elts[(arr).nr++] = elt;			\
 	} while (0)
+
+#define ARR_FOREACH(var, arr)					\
+	for (typeof((arr).elts) var = (arr).elts;		\
+	     var < (arr).elts + (arr).nr; var++)
 
 #endif

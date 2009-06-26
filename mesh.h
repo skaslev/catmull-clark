@@ -19,10 +19,8 @@ void mesh_compute_normals(struct mesh *mesh);
 /*
  * Vertex buffer access
  */
-int mesh_vertex_count(const struct mesh *mesh);
-int mesh_normal_count(const struct mesh *mesh);
-const struct vec *mesh_vertex_buffer(const struct mesh *mesh);
-const struct vec *mesh_normal_buffer(const struct mesh *mesh);
+int mesh_vertex_buffer(const struct mesh *mesh, const struct vec **buf);
+int mesh_normal_buffer(const struct mesh *mesh, const struct vec **buf);
 
 /*
  * Face access
