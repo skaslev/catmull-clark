@@ -7,49 +7,49 @@ struct idx {
 };
 
 struct mesh {
-	ARR_DEF(struct vec, vbuf);
-	ARR_DEF(struct vec, nbuf);
-	ARR_DEF(struct idx, ibuf);
-	ARR_DEF(int, faces);
+	arr_def(struct vec, vbuf);
+	arr_def(struct vec, nbuf);
+	arr_def(struct idx, ibuf);
+	arr_def(int, faces);
 };
 
 struct mesh *mesh_create(void)
 {
 	struct mesh *mesh = malloc(sizeof(*mesh));
-	ARR_INIT(mesh->vbuf);
-	ARR_INIT(mesh->nbuf);
-	ARR_INIT(mesh->ibuf);
-	ARR_INIT(mesh->faces);
+	arr_init(mesh->vbuf);
+	arr_init(mesh->nbuf);
+	arr_init(mesh->ibuf);
+	arr_init(mesh->faces);
 	return mesh;
 }
 
 void mesh_destroy(struct mesh *mesh)
 {
-	ARR_CLEAR(mesh->vbuf);
-	ARR_CLEAR(mesh->nbuf);
-	ARR_CLEAR(mesh->ibuf);
-	ARR_CLEAR(mesh->faces);
+	arr_clear(mesh->vbuf);
+	arr_clear(mesh->nbuf);
+	arr_clear(mesh->ibuf);
+	arr_clear(mesh->faces);
 	free(mesh);
 }
 
 void mesh_add_vertex(struct mesh *mesh, const struct vec *v)
 {
-	ARR_PUSH(mesh->vbuf, *v);
+	arr_push(mesh->vbuf, *v);
 }
 
 void mesh_add_normal(struct mesh *mesh, const struct vec *n)
 {
-	ARR_PUSH(mesh->nbuf, *n);
+	arr_push(mesh->nbuf, *n);
 }
 
 void mesh_begin_face(struct mesh *mesh)
 {
-	ARR_PUSH(mesh->faces, ARR_SIZE(mesh->ibuf));
+	arr_push(mesh->faces, arr_size(mesh->ibuf));
 }
 
 void mesh_add_index(struct mesh *mesh, int vi, int ni)
 {
-	ARR_PUSH(mesh->ibuf, ((struct idx) { vi, ni }));
+	arr_push(mesh->ibuf, ((struct idx) { vi, ni }));
 }
 
 void mesh_end_face(struct mesh *mesh)
@@ -59,28 +59,28 @@ void mesh_end_face(struct mesh *mesh)
 
 int mesh_vertex_buffer(const struct mesh *mesh, const struct vec **buf)
 {
-	*buf = ARR_ELTS(mesh->vbuf);
-	return ARR_SIZE(mesh->vbuf);
+	*buf = arr_elts(mesh->vbuf);
+	return arr_size(mesh->vbuf);
 }
 
 int mesh_normal_buffer(const struct mesh *mesh, const struct vec **buf)
 {
-	*buf = ARR_ELTS(mesh->nbuf);
-	return ARR_SIZE(mesh->nbuf);
+	*buf = arr_elts(mesh->nbuf);
+	return arr_size(mesh->nbuf);
 }
 
 int mesh_face_count(const struct mesh *mesh)
 {
-	return ARR_SIZE(mesh->faces);
+	return arr_size(mesh->faces);
 }
 
 int mesh_face_vertex_count(const struct mesh *mesh, int face)
 {
 	int beg, end;
 
-	beg = ARR_AT(mesh->faces, face);
-	end = face != ARR_SIZE(mesh->faces) - 1 ?
-		ARR_AT(mesh->faces, face + 1) : ARR_SIZE(mesh->ibuf);
+	beg = arr_at(mesh->faces, face);
+	end = face != arr_size(mesh->faces) - 1 ?
+		arr_at(mesh->faces, face + 1) : arr_size(mesh->ibuf);
 	return end - beg;
 }
 
@@ -90,8 +90,8 @@ void mesh_face_vertex_index(const struct mesh *mesh, int face, int vert,
 	int beg;
 	struct idx *idx;
 
-	beg = ARR_AT(mesh->faces, face);
-	idx = &ARR_AT(mesh->ibuf, beg + vert);
+	beg = arr_at(mesh->faces, face);
+	idx = &arr_at(mesh->ibuf, beg + vert);
 	*vertex_idx = idx->vi;
 	*normal_idx = idx->ni;
 }
@@ -101,7 +101,7 @@ struct vec *mesh_get_vertex(const struct mesh *mesh, int face, int vert)
 	int vi, ni;
 
 	mesh_face_vertex_index(mesh, face, vert, &vi, &ni);
-	return &ARR_AT(mesh->vbuf, vi);
+	return &arr_at(mesh->vbuf, vi);
 }
 
 struct vec *mesh_get_normal(const struct mesh *mesh, int face, int vert)
@@ -109,18 +109,18 @@ struct vec *mesh_get_normal(const struct mesh *mesh, int face, int vert)
 	int vi, ni;
 
 	mesh_face_vertex_index(mesh, face, vert, &vi, &ni);
-	return ni != -1 ? &ARR_AT(mesh->nbuf, ni) : NULL;
+	return ni != -1 ? &arr_at(mesh->nbuf, ni) : NULL;
 }
 
 void mesh_compute_normals(struct mesh *mesh)
 {
 	int i, nr_faces;
 
-	ARR_RESIZE(mesh->nbuf, ARR_SIZE(mesh->vbuf));
-	memset(ARR_ELTS(mesh->nbuf), 0,
-	       ARR_SIZE(mesh->nbuf) * sizeof(*ARR_ELTS(mesh->nbuf)));
+	arr_resize(mesh->nbuf, arr_size(mesh->vbuf));
+	memset(arr_elts(mesh->nbuf), 0,
+	       arr_size(mesh->nbuf) * sizeof(*arr_elts(mesh->nbuf)));
 
-	ARR_FOREACH(idx, mesh->ibuf)
+	arr_foreach(idx, mesh->ibuf)
 		idx->ni = idx->vi;
 
 	nr_faces = mesh_face_count(mesh);
@@ -147,6 +147,6 @@ void mesh_compute_normals(struct mesh *mesh)
 		}
 	}
 
-	ARR_FOREACH(n, mesh->nbuf)
+	arr_foreach(n, mesh->nbuf)
 		vec_normalize(n);
 }
