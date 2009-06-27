@@ -3,22 +3,22 @@
 
 #include <stdlib.h>
 
-#define arr_def(type, name)					\
+#define arr_type(type)						\
 	struct {						\
 		int nr, alloc;					\
 		type *elts;					\
-	} name
+	}
 
-#define arr_init(arr)						\
-	do {							\
-		(arr).nr = 0;					\
-		(arr).alloc = 8;				\
-		(arr).elts = malloc((arr).alloc * sizeof(*(arr).elts)); \
-	} while (0)
+#define arr_def(type, name)	arr_type(type) name
 
-#define arr_init2(arr, sz)					\
+#define arr_init(arr)		arr_init3(arr, 0, 8)
+
+#define arr_init2(arr, nr)	arr_init3(arr, nr, nr)
+
+#define arr_init3(arr, _nr, sz)					\
 	do {							\
-		(arr).nr = (arr).alloc = (sz);			\
+		(arr).nr = (_nr);				\
+		(arr).alloc = (sz) < (_nr) ? (_nr) : (sz);	\
 		(arr).elts = malloc((arr).alloc * sizeof(*(arr).elts)); \
 	} while (0)
 
@@ -38,16 +38,13 @@
 		}						\
 	} while (0)
 
-#define arr_resize(arr, sz)					\
+#define arr_resize(arr, _nr)					\
 	do {							\
-		arr_reserve(arr, sz);				\
-		(arr).nr = (sz);				\
+		arr_reserve(arr, _nr);				\
+		(arr).nr = (_nr);				\
 	} while (0)
 
-
 #define arr_size(arr)			((arr).nr)
-
-#define arr_elts(arr)			((arr).elts)
 
 #define arr_at(arr, idx)		((arr).elts[idx])
 
@@ -65,5 +62,7 @@
 #define arr_foreach(it, arr)					\
 	for (typeof((arr).elts) it = (arr).elts;		\
 	     it < (arr).elts + (arr).nr; it++)
+
+#define arr_idx(arr, it)	((it) - (arr).elts)
 
 #endif

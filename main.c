@@ -5,8 +5,9 @@
 #include "mesh.h"
 #include "meshrend.h"
 #include "obj.h"
+#include "subd.h"
 
-static struct mesh *mesh;
+static struct mesh *orig_mesh, *mesh;
 
 static struct vec center = { 0.0, 0.0, 0.0 };
 static float focal_len = 5.0f;
@@ -203,7 +204,10 @@ int main(int argc, char **argv)
 {
 	struct vec min, max;
 
-	mesh = obj_read("objs/bigguy_00.obj");
+	orig_mesh = obj_read("objs/bigguy_00.obj");
+	mesh = subdivide(orig_mesh, 3);
+	printf("%d verts, %d faces\n",
+	       mesh_vertex_buffer(mesh, NULL), mesh_face_count(mesh));
 	mesh_calc_bounds(mesh, &min, &max);
 	vec_add(&center, &min, &max);
 	vec_div(&center, 2.0f);

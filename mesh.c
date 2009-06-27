@@ -59,13 +59,15 @@ void mesh_end_face(struct mesh *mesh)
 
 int mesh_vertex_buffer(const struct mesh *mesh, const struct vec **buf)
 {
-	*buf = arr_elts(mesh->vbuf);
+	if (buf)
+		*buf = &arr_first(mesh->vbuf);
 	return arr_size(mesh->vbuf);
 }
 
 int mesh_normal_buffer(const struct mesh *mesh, const struct vec **buf)
 {
-	*buf = arr_elts(mesh->nbuf);
+	if (buf)
+		*buf = &arr_first(mesh->nbuf);
 	return arr_size(mesh->nbuf);
 }
 
@@ -117,8 +119,8 @@ void mesh_compute_normals(struct mesh *mesh)
 	int i, nr_faces;
 
 	arr_resize(mesh->nbuf, arr_size(mesh->vbuf));
-	memset(arr_elts(mesh->nbuf), 0,
-	       arr_size(mesh->nbuf) * sizeof(*arr_elts(mesh->nbuf)));
+	memset(&arr_first(mesh->nbuf), 0,
+	       arr_size(mesh->nbuf) * sizeof(arr_first(mesh->nbuf)));
 
 	arr_foreach(idx, mesh->ibuf)
 		idx->ni = idx->vi;

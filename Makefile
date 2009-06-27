@@ -12,8 +12,8 @@ LIBS = -lm -lGL -lGLU -lglut
 
 PROGRAMS = catmull-clark
 
-LIB_H = arr.h util.h geometry.h mesh.h meshrend.h obj.h
-LIB_OBJS = geometry.o mesh.o meshrend.o obj.o
+LIB_H = arr.h util.h geometry.h mesh.h meshrend.h obj.h subd.h
+LIB_OBJS = geometry.o mesh.o meshrend.o obj.o subd.o
 LIB_FILE = libsurf.a
 
 LIBS += $(LIB_FILE)
@@ -38,6 +38,7 @@ geometry.o: $(LIB_H)
 mesh.o: $(LIB_H)
 meshrend.o: $(LIB_H)
 obj.o: $(LIB_H)
+subd.o: $(LIB_H)
 main.o: $(LIB_H)
 
 $(LIB_FILE): $(LIB_OBJS)
