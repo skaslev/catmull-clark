@@ -5,7 +5,7 @@
 #include "util.h"
 
 struct sd_vert {
-	struct vec p;
+	struct vec p, newp;
 	arr_def(int, es);
 	arr_def(int, fs);
 };
@@ -66,6 +66,12 @@ sd_edge_other(struct sd_mesh *sd, struct sd_edge *e, struct sd_vert *v)
 
 static void sd_update_links(struct sd_mesh *sd)
 {
+	arr_foreach(v, sd->verts) {
+		arr_resize(v->fs, 0);
+		arr_resize(v->es, 0);
+	}
+
+	arr_resize(sd->edges, 0);
 	arr_foreach(f, sd->faces) {
 		for (int j = 0; j < arr_size(f->vs); j++) {
 			int v0, v1, ei;
@@ -166,7 +172,7 @@ static int sd_add_vert(struct sd_mesh *sd, const struct vec *p)
 	return arr_size(sd->verts) - 1;
 }
 
-static void sd_do_iteration(struct sd_mesh *sd)
+static void sd_do_iteration(struct sd_mesh *sd, int last_iteration)
 {
 	int V, F, E, Vn, Fn, En;
 	sd_face_arr faces;
@@ -195,7 +201,7 @@ static void sd_do_iteration(struct sd_mesh *sd)
 
 	/* Create face vertices */
 	arr_foreach(f, sd->faces) {
-		struct vec p = { 0, 0, 0 };
+		struct vec p = vec_null;
 		arr_foreach(vi, f->vs)
 			vec_add(&p, &p, &sd_v(*vi).p);
 		vec_div(&p, (float) arr_size(f->vs));
@@ -204,7 +210,7 @@ static void sd_do_iteration(struct sd_mesh *sd)
 
 	/* Create edge vertices */
 	arr_foreach(e, sd->edges) {
-		struct vec p = { 0, 0, 0 };
+		struct vec p = vec_null;
 
 		assert(e->f1 != -1);
 		vec_add(&p, &p, &sd_v(e->v0).p);
@@ -218,7 +224,7 @@ static void sd_do_iteration(struct sd_mesh *sd)
 	/* Move old vertices */
 	arr_foreach(v, sd->verts) {
 		int n;
-		struct vec p, newp;
+		struct vec p;
 
 		if (sd_vi(v) >= V)
 			break;
@@ -226,20 +232,24 @@ static void sd_do_iteration(struct sd_mesh *sd)
 		assert(arr_size(v->fs) == arr_size(v->es));
 		n = arr_size(v->fs);
 
-		newp = v->p;
-		vec_mul(&newp, (float) (n - 2) / n);
+		v->newp = v->p;
+		vec_mul(&v->newp, (float) (n - 2) / n);
 
-		p = (struct vec) { 0, 0, 0 };
+		p = vec_null;
 		arr_foreach(fi, v->fs)
 			vec_add(&p, &p, &sd_v(sd_f(*fi).fvert).p);
-		vec_mad(&newp, 1.0f / (n * n), &p);
+		vec_mad(&v->newp, 1.0f / (n * n), &p);
 		
-		p = (struct vec) { 0, 0, 0 };
+		p = vec_null;
 		arr_foreach(ei, v->es)
 			vec_add(&p, &p, &sd_edge_other(sd, &sd_e(*ei), v)->p);
-		vec_mad(&newp, 1.0f / (n * n), &p);
+		vec_mad(&v->newp, 1.0f / (n * n), &p);
+	}
 
-		v->p = newp;
+	arr_foreach(v, sd->verts) {
+		if (sd_vi(v) >= V)
+			break;
+		v->p = v->newp;
 	}
 
 	/* 2. Create new faces */
@@ -269,15 +279,11 @@ static void sd_do_iteration(struct sd_mesh *sd)
 	SWAP(sd->faces, faces);
 	arr_clear(faces);
 
-	/* TODO: skip this on last iteration */
 	/* 3. Update edges */
-	arr_foreach(v, sd->verts) {
-		arr_resize(v->fs, 0);
-		arr_resize(v->es, 0);
+	if (!last_iteration) {	/* Skip on last iteration */
+		arr_reserve(sd->edges, En);
+		sd_update_links(sd);
 	}
-	arr_resize(sd->edges, 0);
-	arr_reserve(sd->edges, En);
-	sd_update_links(sd);
 }
 
 static struct mesh *sd_convert(struct sd_mesh *sd)
@@ -304,7 +310,7 @@ struct mesh *subdivide(const struct mesh *mesh, int iterations)
 
 	sd = sd_init(mesh);
 	while (iterations--)
-		sd_do_iteration(sd);
+		sd_do_iteration(sd, iterations == 0);
 	ret = sd_convert(sd);
 	sd_destroy(sd);
 	return ret;

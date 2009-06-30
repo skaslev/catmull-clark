@@ -14,6 +14,8 @@ struct vec {
 typedef float mat_t[4][4];
 
 /* Vector operations */
+extern const struct vec vec_null;
+
 static inline void
 vec_add(struct vec *r, const struct vec *a, const struct vec *b)
 {

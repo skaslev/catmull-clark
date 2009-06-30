@@ -1,6 +1,8 @@
 #include <math.h>
 #include "geometry.h"
 
+const struct vec vec_null;
+
 static const mat_t identity = { { 1, 0, 0, 0 },
 				{ 0, 1, 0, 0 },
 				{ 0, 0, 1, 0 },
