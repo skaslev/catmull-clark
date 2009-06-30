@@ -26,6 +26,17 @@ void mesh_render(const struct mesh *mesh)
 	}
 }
 
+GLuint mesh_create_list(const struct mesh *mesh)
+{
+	GLuint list;
+
+	list = glGenLists(1);
+	glNewList(list, GL_COMPILE);
+	mesh_render(mesh);
+	glEndList();
+	return list;
+}
+
 void mesh_calc_bounds(const struct mesh *mesh,
 		      struct vec *min, struct vec *max)
 {

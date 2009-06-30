@@ -6,8 +6,20 @@
 #include "meshrend.h"
 #include "obj.h"
 #include "subd.h"
+#include "gl_util.h"
+#include "util.h"
 
-static struct mesh *orig_mesh, *mesh;
+int cur_obj = 0;
+const char *objs[] = {
+	"objs/cube.obj",
+	"objs/bigguy.obj",
+	"objs/monsterfrog_mapped.obj"
+};
+
+#define NR_LEVELS	4
+static struct mesh *levels[NR_LEVELS];
+static GLuint lists[5];
+static int cur_level = 0;
 
 static struct vec center = { 0.0, 0.0, 0.0 };
 static float focal_len = 5.0f;
@@ -17,8 +29,25 @@ static float fovy  = 90.0f;
 static float znear = 0.1f, zfar = 1000.0f;
 static GLint width = 1024, height = 1024;
 
+static int wireframe = 0;
 static enum { NONE, ROTATING, PANNING, ZOOMING } cur_op = NONE;
 static int last_x, last_y;
+
+static void update_levels()
+{
+	struct vec min, max;
+
+	levels[0] = obj_read(objs[cur_obj]);
+	subdivide_levels(levels[0], &levels[1], NR_LEVELS - 1);
+	for (int i = 0; i < NR_LEVELS; i++)
+		lists[i] = mesh_create_list(levels[i]);
+
+	/* FIXME */
+	mesh_calc_bounds(levels[0], &min, &max);
+	vec_add(&center, &min, &max);
+	vec_div(&center, 2.0f);
+	focal_len = 4.0f * max.y;
+}
 
 static void
 get_camera_frame(struct vec *x, struct vec *y, struct vec *z)
@@ -78,10 +107,15 @@ static void draw_frame(void)
 
 static void draw_scene(void)
 {
-	glPushAttrib(GL_LIGHTING_BIT);
-
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
-	mesh_render(mesh);
+	glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT);
+	if (wireframe) {
+		glDisable(GL_LIGHTING);
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	} else {
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+	glCallList(lists[cur_level]);
 
 	glPopAttrib();
 }
@@ -133,6 +167,28 @@ static void keyboard(unsigned char key, int x, int y)
 {
 	if (key == 27 || key == 17)
 		exit(0);
+
+	switch (key) {
+	case ' ':
+		cur_obj = (cur_obj + 1) % ARRAY_SIZE(objs);
+		update_levels();
+		break;
+	case 8:			/* Backspace */
+		cur_obj = (cur_obj - 1 + ARRAY_SIZE(objs)) % ARRAY_SIZE(objs);
+		update_levels();
+		break;
+	case 'w': case 'W':
+		wireframe = !wireframe;
+		break;
+	case '=': case '+':
+		if (cur_level < NR_LEVELS - 1)
+			cur_level++;
+		break;
+	case '-': case '_':
+		if (cur_level > 0)
+			cur_level--;
+		break;
+	}
 }
 
 static void special(int key, int x, int y)
@@ -202,17 +258,6 @@ static void idle(void)
 
 int main(int argc, char **argv)
 {
-	struct vec min, max;
-
-	orig_mesh = obj_read("objs/bigguy_00.obj");
-	mesh = subdivide(orig_mesh, 3);
-	printf("%d verts, %d faces\n",
-	       mesh_vertex_buffer(mesh, NULL), mesh_face_count(mesh));
-	mesh_calc_bounds(mesh, &min, &max);
-	vec_add(&center, &min, &max);
-	vec_div(&center, 2.0f);
-	focal_len = 2.0f * max.y;
-
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
 	glutInitWindowSize(width, height);
@@ -225,6 +270,8 @@ int main(int argc, char **argv)
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glutIdleFunc(idle);
+
+	update_levels();
 
 	glutMainLoop();
 

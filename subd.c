@@ -315,3 +315,17 @@ struct mesh *subdivide(const struct mesh *mesh, int iterations)
 	sd_destroy(sd);
 	return ret;
 }
+
+void subdivide_levels(const struct mesh *mesh,
+		      struct mesh **levels, int nr_levels)
+{
+	int i;
+	struct sd_mesh *sd;
+
+	sd = sd_init(mesh);
+	for (i = 0; i < nr_levels; i++) {
+		sd_do_iteration(sd, i == nr_levels - 1);
+		levels[i] = sd_convert(sd);
+	}
+	sd_destroy(sd);
+}
