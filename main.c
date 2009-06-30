@@ -35,11 +35,15 @@ static int last_x, last_y;
 
 static void update_levels()
 {
+	int i;
 	struct vec min, max;
 
+	for (i = 0; i < NR_LEVELS; i++)
+		mesh_destroy(levels[i]);
 	levels[0] = obj_read(objs[cur_obj]);
 	subdivide_levels(levels[0], &levels[1], NR_LEVELS - 1);
-	for (int i = 0; i < NR_LEVELS; i++)
+
+	for (i = 0; i < NR_LEVELS; i++)
 		lists[i] = mesh_create_list(levels[i]);
 
 	/* FIXME */

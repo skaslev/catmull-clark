@@ -25,6 +25,8 @@ struct mesh *mesh_create(void)
 
 void mesh_destroy(struct mesh *mesh)
 {
+	if (!mesh)
+		return;
 	arr_clear(mesh->vbuf);
 	arr_clear(mesh->nbuf);
 	arr_clear(mesh->ibuf);
