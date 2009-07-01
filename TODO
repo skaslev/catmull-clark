@@ -1,4 +1,3 @@
-* Add camera focusing support
 * Add fps/poly counter
 * Move camera handling to gl_utils.h
 * Mesh editing support
