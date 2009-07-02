@@ -249,7 +249,8 @@ int main(int argc, char **argv)
 
 	printf("Loading... "); fflush(stdout);
 	ed = ed_create();
-	ed_add_obj(ed, "objs/cube.obj",	5);
+	ed_add_obj(ed, "objs/cube.obj", 5);
+	ed_add_obj(ed, "objs/tetra.obj", 5);
 	ed_add_obj(ed, "objs/bigguy.obj", 4);
 	ed_add_obj(ed, "objs/monsterfrog_mapped.obj", 4);
 	printf("done.\n");
