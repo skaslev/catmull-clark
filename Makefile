@@ -6,6 +6,11 @@ AR = ar
 LIBS = -lm -lGL -lGLU -lglut
 
 #
+# For cygwin, uncomment the next one
+#
+# LIBS = -lm -lopengl32 -lglu32 -lglut32
+
+#
 # For debugging, uncomment the next one
 #
 # CFLAGS += -O0 -DDEBUG -g3 -gdwarf-2
@@ -15,8 +20,6 @@ PROGRAMS = catmull-clark
 LIB_H = arr.h util.h geometry.h mesh.h meshrend.h obj.h gl_util.h subd.h editor.h
 LIB_OBJS = geometry.o mesh.o meshrend.o obj.o gl_util.o subd.o editor.o
 LIB_FILE = libsurf.a
-
-LIBS += $(LIB_FILE)
 
 #
 # Pretty print
@@ -32,7 +35,7 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 all: $(PROGRAMS)
 
 catmull-clark: main.o $(LIB_FILE)
-	$(QUIET_LINK)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
+	$(QUIET_LINK)$(CC) $(LDFLAGS) -o $@ $< $(LIB_FILE) $(LIBS)
 
 geometry.o: $(LIB_H)
 mesh.o: $(LIB_H)
