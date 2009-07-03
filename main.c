@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <GL/glut.h>
 #include "geometry.h"
 #include "mesh.h"
@@ -62,6 +63,7 @@ get_camera(struct vec *eye, struct vec *at, struct vec *up)
 
 static void draw_frame(void)
 {
+
 	glPushAttrib(GL_LIGHTING_BIT);
 	glDisable(GL_LIGHTING);
 
@@ -87,12 +89,34 @@ static void draw_frame(void)
 	glPopAttrib();
 }
 
+static void draw_fps(void)
+{
+	static clock_t ticks;
+	static int nr_frames, fps;
+	clock_t now;
+
+	/* Calculate frame rate */
+	nr_frames++;
+	now = clock();
+	if (now - ticks >= CLOCKS_PER_SEC) {
+		fps = nr_frames;
+		ticks = now;
+		nr_frames = 0;
+	}
+
+	/* Render fps counter */
+	glColor3f(1.0, 1.0f, 1.0f);
+	glRasterPos2f(0.925f, 0.975f);
+	gl_printf(GLUT_BITMAP_HELVETICA_18, "%d fps", fps);
+}
+
 static void display(void)
 {
 	struct vec eye, at, up;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	/* Render scene */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(fovy, (double) width / height, znear, zfar);
@@ -111,6 +135,17 @@ static void display(void)
 	ed_render(ed);
 	draw_frame();
 
+	/* Render overlays */
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glDisable(GL_LIGHTING);
+
+	draw_fps();
+
+	/* Swap buffers */
 	glutSwapBuffers();
 	glutPostRedisplay();
 }

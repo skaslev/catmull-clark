@@ -1,3 +1,3 @@
-* Add fps/poly counter
+* Add mesh/subd level/poly count overlays
 * Move camera handling to gl_utils.h
 * Mesh editing support
