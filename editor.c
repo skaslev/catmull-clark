@@ -1,9 +1,11 @@
 #include <GL/gl.h>
+#include <GL/glut.h>
 #include "geometry.h"
 #include "mesh.h"
 #include "meshrend.h"
 #include "subd.h"
 #include "obj.h"
+#include "gl_util.h"
 #include "editor.h"
 
 struct editor *ed_create()
@@ -28,10 +30,16 @@ void ed_add_obj(struct editor *ed, const char *file, int nr_levels)
 	ed_obj.cur_level = 0;
 	ed_obj.nr_levels = nr_levels;
 	ed_obj.lists = glGenLists(nr_levels);
+	strncpy(ed_obj.file, file, sizeof(ed_obj.file));
+	arr_init2(ed_obj.stats, nr_levels);
 
+	arr_at(ed_obj.stats, 0).vs = mesh_vertex_buffer(ed_obj.mesh, NULL);
+	arr_at(ed_obj.stats, 0).fs = mesh_face_count(ed_obj.mesh);
 	mesh_compile_list(ed_obj.mesh, ed_obj.lists);
 	subdivide_levels(ed_obj.mesh, levels, nr_levels - 1);
 	for (i = 0; i < nr_levels - 1; i++) {
+		arr_at(ed_obj.stats, i+1).vs = mesh_vertex_buffer(levels[i], NULL);
+		arr_at(ed_obj.stats, i+1).fs = mesh_face_count(levels[i]);
 		mesh_compile_list(levels[i], ed_obj.lists + i + 1);
 		mesh_destroy(levels[i]);
 	}
@@ -131,4 +139,18 @@ void ed_render(struct editor *ed)
 		glCallList(ed_obj->lists + ed_obj->cur_level);
 	}
 	glPopAttrib();
+}
+
+void ed_render_overlay(struct editor *ed)
+{
+	struct ed_obj *ed_obj;
+
+	ed_obj = cur_obj(ed);
+	glRasterPos2f(0.005f, 0.975f);
+	gl_printf(GLUT_BITMAP_HELVETICA_18, "%s@%d",
+		  ed_obj->file, ed_obj->cur_level);
+	glRasterPos2f(0.005f, 0.950f);
+	gl_printf(GLUT_BITMAP_HELVETICA_18, "%d verts %d faces",
+		  arr_at(ed_obj->stats, ed_obj->cur_level).vs,
+		  arr_at(ed_obj->stats, ed_obj->cur_level).fs);
 }

@@ -63,7 +63,6 @@ get_camera(struct vec *eye, struct vec *at, struct vec *up)
 
 static void draw_frame(void)
 {
-
 	glPushAttrib(GL_LIGHTING_BIT);
 	glDisable(GL_LIGHTING);
 
@@ -105,7 +104,6 @@ static void draw_fps(void)
 	}
 
 	/* Render fps counter */
-	glColor3f(1.0, 1.0f, 1.0f);
 	glRasterPos2f(0.925f, 0.975f);
 	gl_printf(GLUT_BITMAP_HELVETICA_18, "%d fps", fps);
 }
@@ -142,8 +140,10 @@ static void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glDisable(GL_LIGHTING);
+	glColor3f(1.0, 1.0f, 1.0f);
 
 	draw_fps();
+	ed_render_overlay(ed);
 
 	/* Swap buffers */
 	glutSwapBuffers();
