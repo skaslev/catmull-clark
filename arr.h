@@ -9,8 +9,6 @@
 		type *elts;					\
 	}
 
-#define arr_def(type, name)	arr_type(type) name
-
 #define arr_init(arr)		arr_init3(arr, 0, 8)
 
 #define arr_init2(arr, nr)	arr_init3(arr, nr, nr)

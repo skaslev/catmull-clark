@@ -6,12 +6,12 @@
 
 struct sd_vert {
 	struct vec p, newp;
-	arr_def(int, es);
-	arr_def(int, fs);
+	arr_type(int) es;
+	arr_type(int) fs;
 };
 
 struct sd_face {
-	arr_def(int, vs);
+	arr_type(int) vs;
 	int fvert;
 };
 

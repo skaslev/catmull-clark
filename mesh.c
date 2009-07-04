@@ -7,10 +7,10 @@ struct idx {
 };
 
 struct mesh {
-	arr_def(struct vec, vbuf);
-	arr_def(struct vec, nbuf);
-	arr_def(struct idx, ibuf);
-	arr_def(int, faces);
+	arr_type(struct vec) vbuf;
+	arr_type(struct vec) nbuf;
+	arr_type(struct idx) ibuf;
+	arr_type(int) faces;
 };
 
 struct mesh *mesh_create(void)
