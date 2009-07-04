@@ -21,15 +21,11 @@ struct sd_edge {
 	int evert;
 };
 
-typedef arr_type(struct sd_vert) sd_vert_arr;
-typedef arr_type(struct sd_face) sd_face_arr;
-typedef arr_type(struct sd_edge) sd_edge_arr;
-
 struct sd_mesh {
 	int first_iteration;
-	sd_vert_arr verts;
-	sd_face_arr faces;
-	sd_edge_arr edges;
+	arr_type(struct sd_vert) verts;
+	arr_type(struct sd_face) faces;
+	arr_type(struct sd_edge) edges;
 };
 
 #define sd_v(vi)		(arr_at(sd->verts, (vi)))
@@ -175,7 +171,7 @@ static int sd_add_vert(struct sd_mesh *sd, const struct vec *p)
 static void sd_do_iteration(struct sd_mesh *sd, int last_iteration)
 {
 	int V, F, E, Vn, Fn, En;
-	sd_face_arr faces;
+	typeof(sd->faces) faces;
 
 	/* V' = V + F + E
 	 * F' = Sum_i=0^F(f_i), (F' = 4F, when quad-mesh)
