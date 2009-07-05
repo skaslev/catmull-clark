@@ -287,7 +287,7 @@ int main(int argc, char **argv)
 	ed_add_obj(ed, "objs/cube.obj", 5);
 	ed_add_obj(ed, "objs/tetra.obj", 5);
 	ed_add_obj(ed, "objs/bigguy.obj", 3);
-	ed_add_obj(ed, "objs/monsterfrog_mapped.obj", 3);
+	ed_add_obj(ed, "objs/monsterfrog.obj", 3);
 	printf("done.\n");
 
 	focus_camera(ed_cur_obj(ed));
