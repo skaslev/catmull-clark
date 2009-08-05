@@ -40,7 +40,7 @@ struct mesh *obj_read(const char *file)
 
 			sscanf(str, "v %f %f %f", &v.x, &v.y, &v.z);
 			mesh_add_vertex(mesh, &v);
-		} else if (strncmp(str, "vn ", 2) == 0) {
+		} else if (strncmp(str, "vn ", 3) == 0) {
 			/* Normal command */
 			struct vec n;
 
