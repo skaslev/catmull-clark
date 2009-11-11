@@ -19,7 +19,7 @@
 #define buf_maybegrow_(a, n)	(((n) > 0) && (!(a) || (n) >= buf_m_(a)) ? buf_realloc_(a, n) : (void) 0)
 #define buf_maybegrow1_(a)	(!(a) || buf_m_(a) == 0 ? buf_realloc_(a, 8) :\
 				 buf_n_(a) == buf_m_(a) ? buf_realloc_(a, 2 * buf_m_(a)) : (void) 0)
-#define buf_realloc_(a, n)	buf_do_realloc_((void **) &(a), n, sizeof(*(a)))
+#define buf_realloc_(a, n)	buf_do_realloc_((void *) &(a), n, sizeof(*(a)))
 
 void buf_do_realloc_(void **a, int nr, int sz);
 
