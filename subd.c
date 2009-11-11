@@ -67,8 +67,8 @@ static void sd_update_links(struct sd_mesh *sd)
 	struct sd_face *f;
 
 	buf_foreach(v, sd->verts) {
-		if (v->fs) buf_resize(v->fs, 0);
-		if (v->es) buf_resize(v->es, 0);
+		buf_resize(v->fs, 0);
+		buf_resize(v->es, 0);
 	}
 
 	buf_resize(sd->edges, 0);
