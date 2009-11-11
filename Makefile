@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -O2 -finline-functions -g
-CFLAGS += -ansi -pedantic -Wall -Winline
+CFLAGS += -ansi -Wall -Winline
 LDFLAGS += -g
 AR = ar
 LIBS = -lm -lGL -lGLU -lglut
