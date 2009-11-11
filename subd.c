@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdlib.h>
 #include "buf.h"
 #include "geometry.h"
 #include "mesh.h"

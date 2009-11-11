@@ -1,8 +1,6 @@
 #ifndef BUF_H
 #define BUF_H
 
-#include <stdlib.h>
-
 /* Based on Sean Barrett's stretchy buffer at http://www.nothings.org/stb/stretchy_buffer.txt
  * init: NULL, free: buf_free(), push_back: buf_push(), size: buf_len()
  */
@@ -23,13 +21,6 @@
 				 buf_n_(a) == buf_m_(a) ? buf_realloc_(a, 2 * buf_m_(a)) : (void) 0)
 #define buf_realloc_(a, n)	buf_do_realloc_((void **) &(a), n, sizeof(*(a)))
 
-static void buf_do_realloc_(void **a, int nr, int sz)
-{
-	int *p = realloc(*a ? buf_raw_(*a) : NULL, 2 * sizeof(int) + nr * sz);
-	p[0] = nr;
-	if (!*a)
-		p[1] = 0;
-	*a = p + 2;
-}
+void buf_do_realloc_(void **a, int nr, int sz);
 
 #endif

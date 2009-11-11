@@ -18,7 +18,7 @@ LIBS = -lm -lGL -lGLU -lglut
 PROGRAMS = catmull-clark
 
 LIB_H = buf.h util.h geometry.h mesh.h meshrend.h obj.h gl.h gl_util.h subd.h editor.h
-LIB_OBJS = geometry.o mesh.o meshrend.o obj.o gl_util.o subd.o editor.o
+LIB_OBJS = buf.o geometry.o mesh.o meshrend.o obj.o gl_util.o subd.o editor.o
 LIB_FILE = libsurf.a
 
 #
@@ -36,6 +36,7 @@ all: $(PROGRAMS)
 catmull-clark: main.o $(LIB_FILE)
 	$(QUIET_LINK)$(CC) $(LDFLAGS) -o $@ $< $(LIB_FILE) $(LIBS)
 
+buf.o: $(LIB_H)
 geometry.o: $(LIB_H)
 mesh.o: $(LIB_H)
 meshrend.o: $(LIB_H)
