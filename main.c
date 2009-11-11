@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <GL/glut.h>
+#include "gl.h"
+#include "gl_util.h"
 #include "geometry.h"
 #include "mesh.h"
 #include "meshrend.h"
-#include "gl_util.h"
 #include "editor.h"
 
 static struct editor *ed;
@@ -16,7 +15,7 @@ static float y_rot = 0.0f, x_rot = 0.0f;
 
 static float fovy  = 90.0f;
 static float znear = 0.1f, zfar = 1000.0f;
-static GLint width = 1024, height = 1024;
+static GLint width = 960, height = 960;
 
 static enum { NONE, ROTATING, PANNING, ZOOMING } cur_op = NONE;
 static int last_x, last_y;
@@ -32,26 +31,24 @@ static void focus_camera(const struct mesh *mesh)
 	focal_len = 4.0f * max.y;
 }
 
-static void
-get_camera_frame(struct vec *x, struct vec *y, struct vec *z)
+static void get_camera_frame(struct vec *x, struct vec *y, struct vec *z)
 {
-	mat_t m;
+	struct mat m;
 
-	*x = (struct vec) { 1.0f, 0.0f, 0.0f };
-	*y = (struct vec) { 0.0f, 1.0f, 0.0f };
-	*z = (struct vec) { 0.0f, 0.0f, 1.0f };
+	vec_set(x, 1.0f, 0.0f, 0.0f);
+	vec_set(y, 0.0f, 1.0f, 0.0f);
+	vec_set(z, 0.0f, 0.0f, 1.0f);
 
-	mat_rot(m, y, y_rot);
-	mat_mul_vector(x, m, x);
-	mat_mul_vector(z, m, z);
+	mat_rot(&m, y, y_rot);
+	mat_mul_vector(x, &m, x);
+	mat_mul_vector(z, &m, z);
 
-	mat_rot(m, x, x_rot);
-	mat_mul_vector(y, m, y);
-	mat_mul_vector(z, m, z);
+	mat_rot(&m, x, x_rot);
+	mat_mul_vector(y, &m, y);
+	mat_mul_vector(z, &m, z);
 }
 
-static inline void
-get_camera(struct vec *eye, struct vec *at, struct vec *up)
+static void get_camera(struct vec *eye, struct vec *at, struct vec *up)
 {
 	struct vec x, y, z;
 
@@ -61,55 +58,9 @@ get_camera(struct vec *eye, struct vec *at, struct vec *up)
 	*up = y;
 }
 
-static void draw_frame(void)
-{
-	glPushAttrib(GL_LIGHTING_BIT);
-	glDisable(GL_LIGHTING);
-
-	glBegin(GL_LINES);
-
-	/* Draw the x axis */
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(1.0f, 0.0f, 0.0f);
-
-	/* Draw the y axis */
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 1.0f, 0.0f);
-
-	/* Draw the z axis */
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 0.0f, 1.0f);
-
-	glEnd();
-
-	glPopAttrib();
-}
-
-static void draw_fps(void)
-{
-	static clock_t ticks;
-	static int nr_frames, fps;
-	clock_t now;
-
-	/* Calculate frame rate */
-	nr_frames++;
-	now = clock();
-	if (now - ticks >= CLOCKS_PER_SEC) {
-		fps = nr_frames;
-		ticks = now;
-		nr_frames = 0;
-	}
-
-	/* Render fps counter */
-	glRasterPos2f(0.925f, 0.975f);
-	gl_printf(GLUT_BITMAP_HELVETICA_18, "%d fps", fps);
-}
-
 static void display(void)
 {
+	GLfloat param[4];
 	struct vec eye, at, up;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -124,26 +75,20 @@ static void display(void)
 	gluLookAt(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.z);
 
 	glEnable(GL_LIGHTING);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE,
-		  (GLfloat []) { 1.0f, 1.0f, 1.0f, 1.0f });
-	glLightfv(GL_LIGHT0, GL_POSITION,
-		  (GLfloat []) { eye.x, eye.y, eye.z, 1.0f });
+	param[0] = 1.0f; param[1] = 1.0f; param[2] = 1.0f; param[3] = 1.0f;
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, param);
+	param[0] = eye.x; param[1] = eye.y; param[2] = eye.z; param[3] = 1.0f;
+	glLightfv(GL_LIGHT0, GL_POSITION, param);
 	glEnable(GL_LIGHT0);
 
 	ed_render(ed);
-	draw_frame();
+	gl_draw_xyz();
 
 	/* Render overlays */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glDisable(GL_LIGHTING);
-	glColor3f(1.0, 1.0f, 1.0f);
-
-	draw_fps();
+	gl_begin_2d();
+	gl_draw_fps(0.925f, 0.975f);
 	ed_render_overlay(ed);
+	gl_end_2d();
 
 	/* Swap buffers */
 	glutSwapBuffers();
@@ -154,12 +99,7 @@ static void reshape(int w, int h)
 {
 	width = w > 1 ? w : 1;
 	height = h > 1 ? h : 1;
-
 	glViewport(0, 0, width, height);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
 	glClearDepth(1.0);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -211,10 +151,10 @@ static void special(int key, int x, int y)
 static void mouse(int button, int state, int x, int y)
 {
 	static const int cursor[] = {
-		[NONE]     = GLUT_CURSOR_RIGHT_ARROW,
-		[ROTATING] = GLUT_CURSOR_CYCLE,
-		[PANNING]  = GLUT_CURSOR_CROSSHAIR,
-		[ZOOMING]  = GLUT_CURSOR_UP_DOWN
+		GLUT_CURSOR_RIGHT_ARROW,		/* NONE */
+		GLUT_CURSOR_CYCLE,			/* ROTATING */
+		GLUT_CURSOR_CROSSHAIR,			/* PANNING */
+		GLUT_CURSOR_UP_DOWN			/* ZOOMING */
 	};
 
 	if ((glutGetModifiers() & GLUT_ACTIVE_ALT) && state == GLUT_DOWN) {
@@ -242,8 +182,8 @@ static void motion(int x, int y)
 	dy = (float) (y - last_y) / height;
 
 	if (cur_op == ROTATING) {
-		y_rot -= dx * 2.0f * M_PI;
-		x_rot -= dy * 2.0f * M_PI;
+		y_rot -= dx * 2.0f * PI;
+		x_rot -= dy * 2.0f * PI;
 	} else if (cur_op == PANNING) {
 		float lx, ly;
 		struct vec x, y, z;
@@ -270,7 +210,7 @@ static void idle(void)
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(width, height);
 	glutCreateWindow("catmull-clark");
 

@@ -1,8 +1,6 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include "arr.h"
-
 struct ed_mesh_stat {
 	int vs, fs;
 };
@@ -13,11 +11,11 @@ struct ed_obj {
 	int nr_levels;
 	GLuint lists;
 	char file[256];
-	arr_type(struct ed_mesh_stat)  stats;
+	struct ed_mesh_stat *stats;
 };
 
 struct editor {
-	arr_type(struct ed_obj) objs;
+	struct ed_obj *objs;
 	int cur_obj;
 	int wireframe;
 	int editing;

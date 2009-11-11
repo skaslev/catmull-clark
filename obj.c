@@ -1,16 +1,17 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include "geometry.h"
 #include "mesh.h"
 
-static inline const char *skip_space(const char *str)
+static const char *skip_space(const char *str)
 {
 	while (*str && isspace(*str))
 		str++;
 	return str;
 }
 
-static inline const char *skip_non_space(const char *str)
+static const char *skip_non_space(const char *str)
 {
 	while (*str && !isspace(*str))
 		str++;

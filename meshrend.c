@@ -1,5 +1,6 @@
 #include <math.h>
-#include <GL/gl.h>
+#include <stdlib.h>
+#include "gl.h"
 #include "geometry.h"
 #include "mesh.h"
 
@@ -40,8 +41,8 @@ void mesh_calc_bounds(const struct mesh *mesh,
 	const struct vec *vbuf;
 
 	nr = mesh_vertex_buffer(mesh, &vbuf);
-	*min = (struct vec) {  INFINITY,  INFINITY,  INFINITY };
-	*max = (struct vec) { -INFINITY, -INFINITY, -INFINITY };
+	vec_set(min,  HUGE,  HUGE,  HUGE);
+	vec_set(max, -HUGE, -HUGE, -HUGE);
 	for (i = 0; i < nr; i++) {
 		vec_min(min, min, vbuf + i);
 		vec_max(max, max, vbuf + i);

@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -O2 -finline-functions -g
-CFLAGS += -Wall -Winline -std=gnu99
+CFLAGS += -ansi -pedantic -Wall -Winline
 LDFLAGS += -g
 AR = ar
 LIBS = -lm -lGL -lGLU -lglut
@@ -17,7 +17,7 @@ LIBS = -lm -lGL -lGLU -lglut
 
 PROGRAMS = catmull-clark
 
-LIB_H = arr.h util.h geometry.h mesh.h meshrend.h obj.h gl_util.h subd.h editor.h
+LIB_H = buf.h util.h geometry.h mesh.h meshrend.h obj.h gl.h gl_util.h subd.h editor.h
 LIB_OBJS = geometry.o mesh.o meshrend.o obj.o gl_util.o subd.o editor.o
 LIB_FILE = libsurf.a
 
