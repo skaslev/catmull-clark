@@ -21,6 +21,13 @@ struct mesh *mesh_create(void)
 	mesh->nbuf = NULL;
 	mesh->ibuf = NULL;
 	mesh->faces = NULL;
+
+	/* HACK: Crashes on gcc otherwise?! */
+	buf_reserve(mesh->vbuf, 8);
+	buf_reserve(mesh->nbuf, 8);
+	buf_reserve(mesh->ibuf, 8);
+	buf_reserve(mesh->faces, 8);
+
 	return mesh;
 }
 
