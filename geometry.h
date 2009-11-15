@@ -16,11 +16,6 @@ struct mat {
 	float m[4][4];
 };
 
-struct ray {
-	struct vec o;
-	struct vec d;
-};
-
 /* Vector operations */
 extern const struct vec vec_null;
 
