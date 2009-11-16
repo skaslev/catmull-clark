@@ -79,13 +79,14 @@ extern const struct vec vec_null;
 extern const struct mat mat_null;
 extern const struct mat mat_ident;
 
+float mat_determinant(const struct mat *a);
 void mat_invert(struct mat *r, const struct mat *a);
 void mat_prod(struct mat *r, const struct mat *a, const struct mat *b);
 
-void mat_rot(struct mat *r, const struct vec *v, float alpha);
+void mat_rotate(struct mat *r, const struct vec *v, float angle);
 
-void mat_mul_point(struct vec *r, const struct mat *m, const struct vec *a);
-void mat_mul_vector(struct vec *r, const struct mat *m, const struct vec *a);
-void mat_mul_vector_T(struct vec *r, const struct mat *m, const struct vec *a);
+void mat_mul_point(struct vec *r, const struct mat *a, const struct vec *v);
+void mat_mul_vector(struct vec *r, const struct mat *a, const struct vec *v);
+void mat_mul_vector_T(struct vec *r, const struct mat *a, const struct vec *v);
 
 #endif

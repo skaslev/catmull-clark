@@ -39,11 +39,11 @@ static void get_camera_frame(struct vec *x, struct vec *y, struct vec *z)
 	vec_set(y, 0.0f, 1.0f, 0.0f);
 	vec_set(z, 0.0f, 0.0f, 1.0f);
 
-	mat_rot(&m, y, y_rot);
+	mat_rotate(&m, y, y_rot);
 	mat_mul_vector(x, &m, x);
 	mat_mul_vector(z, &m, z);
 
-	mat_rot(&m, x, x_rot);
+	mat_rotate(&m, x, x_rot);
 	mat_mul_vector(y, &m, y);
 	mat_mul_vector(z, &m, z);
 }
