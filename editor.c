@@ -10,6 +10,26 @@
 #include "gl_util.h"
 #include "editor.h"
 
+struct ed_mesh_stat {
+	int vs, fs;
+};
+
+struct ed_obj {
+	struct mesh *mesh;
+	int cur_level;
+	int nr_levels;
+	GLuint lists;
+	char file[256];
+	struct ed_mesh_stat *stats;
+};
+
+struct editor {
+	struct ed_obj *objs;
+	int cur_obj;
+	int wireframe;
+	int editing;
+};
+
 #define MAX_LEVELS		16
 
 struct editor *ed_create()
@@ -112,6 +132,11 @@ void ed_toggle_editing(struct editor *ed)
 			mesh_destroy(levels[i]);
 		}
 	}
+}
+
+int ed_is_editing(struct editor *ed)
+{
+	return ed->editing;
 }
 
 void ed_render(struct editor *ed)

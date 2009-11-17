@@ -119,7 +119,7 @@ static void keyboard(unsigned char key, int x, int y)
 		break;
 	}
 
-	if (!ed->editing) {
+	if (!ed_is_editing(ed)) {
 		switch (key) {
 		case ' ':
 			ed_next_obj(ed);
