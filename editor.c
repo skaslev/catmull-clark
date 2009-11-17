@@ -10,17 +10,13 @@
 #include "gl_util.h"
 #include "editor.h"
 
-struct ed_mesh_stat {
-	int vs, fs;
-};
-
 struct ed_obj {
 	struct mesh *mesh;
 	int cur_level;
 	int nr_levels;
 	GLuint lists;
 	char file[256];
-	struct ed_mesh_stat *stats;
+	struct { int vs, fs; } *stats;
 };
 
 struct editor {
