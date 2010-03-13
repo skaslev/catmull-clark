@@ -6,14 +6,14 @@
 
 static const char *skip_space(const char *str)
 {
-	while (*str && isspace(*str))
+	while (*str && isspace((int) *str))
 		str++;
 	return str;
 }
 
 static const char *skip_non_space(const char *str)
 {
-	while (*str && !isspace(*str))
+	while (*str && !isspace((int) *str))
 		str++;
 	return str;
 }
