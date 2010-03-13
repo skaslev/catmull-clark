@@ -195,7 +195,7 @@ static void motion(int x, int y)
 		vec_mad(&center, -dx * lx, &x);
 		vec_mad(&center,  dy * ly, &y);
 	} else if (cur_op == ZOOMING) {
-		focal_len *= 1.0f - dy;
+		focal_len *= (1.0f - dy) - dx;
 	}
 
 	last_x = x;
