@@ -1,14 +1,13 @@
 CC = gcc
-CFLAGS = -O2 -finline-functions -g
+CFLAGS = -O2 -finline-functions
 CFLAGS += -ansi -Wall -Winline
-LDFLAGS += -g
 AR = ar
 LIBS = -lm -lGL -lGLU -lglut
 
-#
-# For cygwin, uncomment the next one
-#
-# LIBS = -lm -lopengl32 -lglu32 -lglut32
+ifeq ($(shell uname -o),Cygwin)
+	LIBS = -lm -lopengl32 -lglu32 -lglut32
+	LDFLAGS += -static-libgcc
+endif
 
 #
 # For debugging, uncomment the next one
