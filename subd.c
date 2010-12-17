@@ -1,12 +1,12 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "buf.h"
-#include "geometry.h"
+#include "mathx.h"
 #include "mesh.h"
 #include "util.h"
 
 struct sd_vert {
-	struct vec p, newp;
+	vector p, newp;
 	int *es;
 	int *fs;
 };
@@ -105,7 +105,7 @@ static void sd_update_links(struct sd_mesh *sd)
 static struct sd_mesh *sd_init(const struct mesh *mesh)
 {
 	int i, j, nr_verts, nr_faces;
-	const struct vec *vbuf;
+	const float *vbuf;
 	struct sd_vert *v;
 	struct sd_mesh *sd;
 
@@ -119,9 +119,10 @@ static struct sd_mesh *sd_init(const struct mesh *mesh)
 	nr_verts = mesh_vertex_buffer(mesh, &vbuf);
 	buf_resize(sd->verts, nr_verts);
 	buf_foreach(v, sd->verts) {
-		v->p = *vbuf++;
+		vec_copy(v->p, vbuf);
 		v->es = NULL;
 		v->fs = NULL;
+		vbuf += 3;
 	}
 
 	/* Create faces */
@@ -170,10 +171,10 @@ static void sd_destroy(struct sd_mesh *sd)
 	free(sd);
 }
 
-static int sd_add_vert(struct sd_mesh *sd, const struct vec *p)
+static int sd_add_vert(struct sd_mesh *sd, vector p)
 {
 	struct sd_vert v;
-	v.p = *p;
+	vec_copy(v.p, p);
 	v.es = NULL;
 	v.fs = NULL;
 	buf_push(sd->verts, v);
@@ -213,30 +214,33 @@ static void sd_do_iteration(struct sd_mesh *sd, int last_iteration)
 
 	/* Create face vertices */
 	buf_foreach(f, sd->faces) {
-		struct vec p = vec_null;
+		vector p;
+
+		vec_zero(p);
 		buf_foreach(vi, f->vs)
-			vec_add(&p, &p, &sd_v(*vi).p);
-		vec_div(&p, (float) buf_len(f->vs));
-		f->fvert = sd_add_vert(sd, &p);
+			vec_add(p, p, sd_v(*vi).p);
+		vec_mul(p, 1.0f / buf_len(f->vs), p);
+		f->fvert = sd_add_vert(sd, p);
 	}
 
 	/* Create edge vertices */
 	buf_foreach(e, sd->edges) {
-		struct vec p = vec_null;
+		vector p;
 
 		assert(e->f1 != -1);
-		vec_add(&p, &p, &sd_v(e->v0).p);
-		vec_add(&p, &p, &sd_v(e->v1).p);
-		vec_add(&p, &p, &sd_v(sd_f(e->f0).fvert).p);
-		vec_add(&p, &p, &sd_v(sd_f(e->f1).fvert).p);
-		vec_div(&p, 4.0f);
-		e->evert = sd_add_vert(sd, &p);
+		vec_zero(p);
+		vec_add(p, p, sd_v(e->v0).p);
+		vec_add(p, p, sd_v(e->v1).p);
+		vec_add(p, p, sd_v(sd_f(e->f0).fvert).p);
+		vec_add(p, p, sd_v(sd_f(e->f1).fvert).p);
+		vec_mul(p, 0.25f, p);
+		e->evert = sd_add_vert(sd, p);
 	}
 
 	/* Move old vertices */
 	buf_foreach(v, sd->verts) {
 		int n;
-		struct vec p;
+		vector p;
 
 		if (sd_vi(v) >= V)
 			break;
@@ -244,24 +248,24 @@ static void sd_do_iteration(struct sd_mesh *sd, int last_iteration)
 		assert(buf_len(v->fs) == buf_len(v->es));
 		n = buf_len(v->fs);
 
-		v->newp = v->p;
-		vec_mul(&v->newp, (float) (n - 2) / n);
+		vec_copy(v->newp, v->p);
+		vec_mul(v->newp, (float) (n - 2) / n, v->newp);
 
-		p = vec_null;
+		vec_zero(p);
 		buf_foreach(fi, v->fs)
-			vec_add(&p, &p, &sd_v(sd_f(*fi).fvert).p);
-		vec_mad(&v->newp, 1.0f / (n * n), &p);
+			vec_add(p, p, sd_v(sd_f(*fi).fvert).p);
+		vec_mad(v->newp, 1.0f / (n * n), p);
 		
-		p = vec_null;
+		vec_zero(p);
 		buf_foreach(ei, v->es)
-			vec_add(&p, &p, &sd_edge_other(sd, &sd_e(*ei), v)->p);
-		vec_mad(&v->newp, 1.0f / (n * n), &p);
+			vec_add(p, p, sd_edge_other(sd, &sd_e(*ei), v)->p);
+		vec_mad(v->newp, 1.0f / (n * n), p);
 	}
 
 	buf_foreach(v, sd->verts) {
 		if (sd_vi(v) >= V)
 			break;
-		v->p = v->newp;
+		vec_copy(v->p, v->newp);
 	}
 
 	/* 2. Create new faces */
@@ -309,7 +313,7 @@ static struct mesh *sd_convert(struct sd_mesh *sd)
 
 	mesh = mesh_create();
 	buf_foreach(v, sd->verts)
-		mesh_add_vertex(mesh, &v->p);
+		mesh_add_vertex(mesh, v->p);
 	buf_foreach(f, sd->faces) {
 		mesh_begin_face(mesh);
 		buf_foreach(vi, f->vs)

@@ -1,9 +1,7 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-struct editor;
-
-struct editor *ed_create();
+struct editor *ed_create(void);
 void ed_add_obj(struct editor *ed, const char *file, int levels);
 
 struct mesh *ed_cur_obj(struct editor *ed);

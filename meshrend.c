@@ -1,8 +1,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include "gl.h"
-#include "geometry.h"
 #include "mesh.h"
+#include "mathx.h"
 
 void mesh_render(const struct mesh *mesh)
 {
@@ -15,13 +15,14 @@ void mesh_render(const struct mesh *mesh)
 		nr_verts = mesh_face_vertex_count(mesh, i);
 		glBegin(GL_POLYGON);
 		for (j = 0; j < nr_verts; j++) {
-			const struct vec *v;
+			const float *v;
 
-			if ((v = mesh_get_normal(mesh, i, j)))
-				glNormal3f(v->x, v->y, v->z);
+			v = mesh_get_normal(mesh, i, j);
+			if (v)
+				glNormal3fv(v);
 
 			v = mesh_get_vertex(mesh, i, j);
-			glVertex3f(v->x, v->y, v->z);
+			glVertex3fv(v);
 		}
 		glEnd();
 	}
@@ -34,17 +35,16 @@ void mesh_compile_list(const struct mesh *mesh, GLuint list)
 	glEndList();
 }
 
-void mesh_calc_bounds(const struct mesh *mesh,
-		      struct vec *min, struct vec *max)
+void mesh_calc_bounds(const struct mesh *mesh, float *min, float *max)
 {
 	int i, nr;
-	const struct vec *vbuf;
+	const float *vbuf;
 
 	nr = mesh_vertex_buffer(mesh, &vbuf);
-	vec_set(min,  HUGE,  HUGE,  HUGE);
-	vec_set(max, -HUGE, -HUGE, -HUGE);
+	vec_set(min, INFINITY, INFINITY, INFINITY);
+	vec_neg(max, min);
 	for (i = 0; i < nr; i++) {
-		vec_min(min, min, vbuf + i);
-		vec_max(max, max, vbuf + i);
+		vec_min(min, min, vbuf + 3 * i);
+		vec_max(max, max, vbuf + 3 * i);
 	}
 }

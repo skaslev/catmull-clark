@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "buf.h"
-#include "geometry.h"
+#include "mathx.h"
 #include "mesh.h"
 
 struct idx {
@@ -9,8 +9,8 @@ struct idx {
 };
 
 struct mesh {
-	struct vec *vbuf;
-	struct vec *nbuf;
+	float *vbuf;
+	float *nbuf;
 	struct idx *ibuf;
 	int *faces;
 };
@@ -36,14 +36,18 @@ void mesh_destroy(struct mesh *mesh)
 	free(mesh);
 }
 
-void mesh_add_vertex(struct mesh *mesh, const struct vec *v)
+void mesh_add_vertex(struct mesh *mesh, const float *v)
 {
-	buf_push(mesh->vbuf, *v);
+	buf_push(mesh->vbuf, v[0]);
+	buf_push(mesh->vbuf, v[1]);
+	buf_push(mesh->vbuf, v[2]);
 }
 
-void mesh_add_normal(struct mesh *mesh, const struct vec *n)
+void mesh_add_normal(struct mesh *mesh, const float *n)
 {
-	buf_push(mesh->nbuf, *n);
+	buf_push(mesh->nbuf, n[0]);
+	buf_push(mesh->nbuf, n[1]);
+	buf_push(mesh->nbuf, n[2]);
 }
 
 void mesh_begin_face(struct mesh *mesh)
@@ -64,18 +68,18 @@ void mesh_end_face(struct mesh *mesh)
 	/* noop */
 }
 
-int mesh_vertex_buffer(const struct mesh *mesh, const struct vec **buf)
+int mesh_vertex_buffer(const struct mesh *mesh, const float **buf)
 {
 	if (buf)
 		*buf = mesh->vbuf;
-	return buf_len(mesh->vbuf);
+	return buf_len(mesh->vbuf) / 3;
 }
 
-int mesh_normal_buffer(const struct mesh *mesh, const struct vec **buf)
+int mesh_normal_buffer(const struct mesh *mesh, const float **buf)
 {
 	if (buf)
 		*buf = mesh->nbuf;
-	return buf_len(mesh->nbuf);
+	return buf_len(mesh->nbuf) / 3;
 }
 
 int mesh_face_count(const struct mesh *mesh)
@@ -105,27 +109,26 @@ void mesh_face_vertex_index(const struct mesh *mesh, int face, int vert,
 	*normal_idx = idx->ni;
 }
 
-struct vec *mesh_get_vertex(const struct mesh *mesh, int face, int vert)
+float *mesh_get_vertex(const struct mesh *mesh, int face, int vert)
 {
 	int vi, ni;
 
 	mesh_face_vertex_index(mesh, face, vert, &vi, &ni);
-	return &mesh->vbuf[vi];
+	return &mesh->vbuf[vi * 3];
 }
 
-struct vec *mesh_get_normal(const struct mesh *mesh, int face, int vert)
+float *mesh_get_normal(const struct mesh *mesh, int face, int vert)
 {
 	int vi, ni;
 
 	mesh_face_vertex_index(mesh, face, vert, &vi, &ni);
-	return ni != -1 ? &mesh->nbuf[ni] : NULL;
+	return ni != -1 ? &mesh->nbuf[ni * 3] : NULL;
 }
 
 void mesh_compute_normals(struct mesh *mesh)
 {
 	int i, nr_faces;
 	struct idx *idx;
-	struct vec *n;
 
 	buf_resize(mesh->nbuf, buf_len(mesh->vbuf));
 	memset(mesh->nbuf, 0, buf_len(mesh->nbuf) * sizeof(*mesh->nbuf));
@@ -139,24 +142,25 @@ void mesh_compute_normals(struct mesh *mesh)
 
 		nr_verts = mesh_face_vertex_count(mesh, i);
 		for (j = 0; j < nr_verts; j++) {
-			const struct vec *v0, *v1, *v2;
-			struct vec u, v, n;
-			struct vec *vn;
+			vector u, v, n;
+			float *v0, *v1, *v2, *vn;
 
 			v0 = mesh_get_vertex(mesh, i, j);
 			v1 = mesh_get_vertex(mesh, i, (j + 1) % nr_verts);
 			v2 = mesh_get_vertex(mesh, i, (j + nr_verts - 1) % nr_verts);
 
-			vec_sub(&u, v1, v0);
-			vec_sub(&v, v2, v0);
-			vec_prod(&n, &u, &v);
-			vec_normalize(&n);
+			vec_sub(u, v1, v0);
+			vec_sub(v, v2, v0);
+			vec_cross(n, u, v);
+			vec_normalize(n, n);
 
 			vn = mesh_get_normal(mesh, i, j);
-			vec_add(vn, vn, &n);
+			vec_add(vn, vn, n);
 		}
 	}
 
-	buf_foreach(n, mesh->nbuf)
-		vec_normalize(n);
+	for (i = 0; i < buf_len(mesh->nbuf); i += 3) {
+		float *n = mesh->nbuf + i;
+		vec_normalize(n, n);
+	}
 }

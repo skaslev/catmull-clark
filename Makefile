@@ -1,6 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -finline-functions
-CFLAGS += -ansi -Wall -Winline
+CFLAGS = -O3 -Wall -Winline -fno-common
 AR = ar
 LIBS = -lm -lGL -lGLU -lglut
 
@@ -16,8 +15,8 @@ endif
 
 PROGRAMS = catmull-clark
 
-LIB_H = buf.h util.h geometry.h mesh.h meshrend.h obj.h gl.h gl_util.h subd.h editor.h
-LIB_OBJS = buf.o geometry.o mesh.o meshrend.o obj.o gl_util.o subd.o editor.o
+LIB_H = buf.h util.h mathx.h mesh.h meshrend.h obj.h gl.h gl_util.h subd.h editor.h
+LIB_OBJS = buf.o mathx.o mesh.o meshrend.o obj.o gl_util.o subd.o editor.o
 LIB_FILE = libsurf.a
 
 #
@@ -36,7 +35,7 @@ catmull-clark: main.o $(LIB_FILE)
 	$(QUIET_LINK)$(CC) $(LDFLAGS) -o $@ $< $(LIB_FILE) $(LIBS)
 
 buf.o: $(LIB_H)
-geometry.o: $(LIB_H)
+mathx.o: $(LIB_H)
 mesh.o: $(LIB_H)
 meshrend.o: $(LIB_H)
 gl_util.o: $(LIB_H)

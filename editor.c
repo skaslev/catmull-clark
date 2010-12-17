@@ -2,7 +2,6 @@
 #include <string.h>
 #include "gl.h"
 #include "buf.h"
-#include "geometry.h"
 #include "mesh.h"
 #include "meshrend.h"
 #include "subd.h"
@@ -137,12 +136,11 @@ int ed_is_editing(struct editor *ed)
 
 void ed_render(struct editor *ed)
 {
-	GLfloat param[4];
 	struct ed_obj *ed_obj = &cur_obj(ed);
 
 	glPushAttrib(GL_LIGHTING_BIT | GL_POLYGON_BIT);
-	param[0] = 1.0f; param[1] = 1.0f; param[2] = 1.0f; param[3] = 1.0f;
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, param);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,
+		     (GLfloat[4]) { 1.0f, 1.0f, 1.0f, 1.0f });
 	if (ed->editing) {
 		glCallList(ed_obj->lists + ed_obj->cur_level);
 		glDisable(GL_LIGHTING);

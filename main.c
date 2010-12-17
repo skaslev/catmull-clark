@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include "gl.h"
 #include "gl_util.h"
-#include "geometry.h"
+#include "mathx.h"
 #include "mesh.h"
 #include "meshrend.h"
 #include "editor.h"
 
 static struct editor *ed;
 
-static struct vec center = { 0.0, 0.0, 0.0 };
+static vector center = { 0.0, 0.0, 0.0 };
 static float focal_len = 5.0f;
 static float y_rot = 0.0f, x_rot = 0.0f;
 
@@ -22,46 +22,47 @@ static int last_x, last_y;
 
 static void focus_camera(const struct mesh *mesh)
 {
-	struct vec min, max;
+	vector min, max;
 
 	/* FIXME */
-	mesh_calc_bounds(mesh, &min, &max);
-	vec_add(&center, &min, &max);
-	vec_div(&center, 2.0f);
-	focal_len = 4.0f * max.y;
+	mesh_calc_bounds(mesh, min, max);
+	vec_add(center, min, max);
+	vec_mul(center, 0.5f, center);
+	focal_len = 4.0f * max[1];
 }
 
-static void get_camera_frame(struct vec *x, struct vec *y, struct vec *z)
+static void get_camera_frame(vector x, vector y, vector z)
 {
-	struct mat m;
+	matrix m;
 
 	vec_set(x, 1.0f, 0.0f, 0.0f);
 	vec_set(y, 0.0f, 1.0f, 0.0f);
 	vec_set(z, 0.0f, 0.0f, 1.0f);
 
-	mat_rotate(&m, y, y_rot);
-	mat_mul_vector(x, &m, x);
-	mat_mul_vector(z, &m, z);
+	mat_rotate(m, y, y_rot);
+	mat_mul_vector(x, m, x);
+	mat_mul_vector(z, m, z);
 
-	mat_rotate(&m, x, x_rot);
-	mat_mul_vector(y, &m, y);
-	mat_mul_vector(z, &m, z);
+	mat_rotate(m, x, x_rot);
+	mat_mul_vector(y, m, y);
+	mat_mul_vector(z, m, z);
 }
 
-static void get_camera(struct vec *eye, struct vec *at, struct vec *up)
+static void get_camera(vector eye, vector at, vector up)
 {
-	struct vec x, y, z;
+	vector x, y, z;
 
-	get_camera_frame(&x, &y, &z);
-	*eye = *at = center;
-	vec_mad(eye, focal_len, &z);
-	*up = y;
+	get_camera_frame(x, y, z);
+	vec_copy(at, center);
+	vec_copy(eye, center);
+	vec_mad(eye, focal_len, z);
+	vec_copy(up, y);
 }
 
 static void display(void)
 {
-	GLfloat param[4];
-	struct vec eye, at, up;
+	matrix m;
+	vector eye, at, up;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -70,15 +71,15 @@ static void display(void)
 	glLoadIdentity();
 	gluPerspective(fovy, (double) width / height, znear, zfar);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	get_camera(&eye, &at, &up);
-	gluLookAt(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.z);
+	get_camera(eye, at, up);
+	mat_lookat(m, eye, at, up);
+	glLoadMatrixf(m);
 
 	glEnable(GL_LIGHTING);
-	param[0] = 1.0f; param[1] = 1.0f; param[2] = 1.0f; param[3] = 1.0f;
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, param);
-	param[0] = eye.x; param[1] = eye.y; param[2] = eye.z; param[3] = 1.0f;
-	glLightfv(GL_LIGHT0, GL_POSITION, param);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,
+		  (GLfloat[4]) { 1.0f, 1.0f, 1.0f, 1.0f });
+	glLightfv(GL_LIGHT0, GL_POSITION,
+		  (GLfloat[4]) { eye[0], eye[1], eye[2], 1.0f });
 	glEnable(GL_LIGHT0);
 
 	ed_render(ed);
@@ -182,18 +183,18 @@ static void motion(int x, int y)
 	dy = (float) (y - last_y) / height;
 
 	if (cur_op == ROTATING) {
-		y_rot -= dx * 2.0f * PI;
-		x_rot -= dy * 2.0f * PI;
+		y_rot -= dx * 360.0f;
+		x_rot -= dy * 360.0f;
 	} else if (cur_op == PANNING) {
 		float lx, ly;
-		struct vec x, y, z;
+		vector x, y, z;
 
-		ly = 2.0f * focal_len * tan(fovy / 2.0f * DEGREE);
+		ly = 2.0f * focal_len * tanf(radians(fovy / 2.0f));
 		lx = ly * width / height;
 
-		get_camera_frame(&x, &y, &z);
-		vec_mad(&center, -dx * lx, &x);
-		vec_mad(&center,  dy * ly, &y);
+		get_camera_frame(x, y, z);
+		vec_mad(center, -dx * lx, x);
+		vec_mad(center,  dy * ly, y);
 	} else if (cur_op == ZOOMING) {
 		focal_len *= (1.0f - dy) - dx;
 	}

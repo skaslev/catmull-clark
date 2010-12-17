@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include "geometry.h"
+#include "mathx.h"
 #include "mesh.h"
 
 static const char *skip_space(const char *str)
@@ -37,16 +37,16 @@ struct mesh *obj_read(const char *file)
 		str = line;
 		if (strncmp(str, "v ", 2) == 0) {
 			/* Vertex command */
-			struct vec v;
+			vector v;
 
-			sscanf(str, "v %f %f %f", &v.x, &v.y, &v.z);
-			mesh_add_vertex(mesh, &v);
+			sscanf(str, "v %f %f %f", v, v + 1, v + 2);
+			mesh_add_vertex(mesh, v);
 		} else if (strncmp(str, "vn ", 3) == 0) {
 			/* Normal command */
-			struct vec n;
+			vector n;
 
-			sscanf(str, "vn %f %f %f", &n.x, &n.y, &n.z);
-			mesh_add_normal(mesh, &n);
+			sscanf(str, "vn %f %f %f", n, n + 1, n + 2);
+			mesh_add_normal(mesh, n);
 		} else if (strncmp(str, "f ", 2) == 0) {
 			/* Face command */
 			int vi, ti, ni;

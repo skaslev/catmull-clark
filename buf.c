@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "buf.h"
 
 void buf_do_realloc_(void **a, int nr, int sz)
