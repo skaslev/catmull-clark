@@ -1,10 +1,10 @@
 CC = gcc
-CFLAGS = -O3 -Wall -Winline -fno-common
+CFLAGS = -O3 -Wall -Winline
 AR = ar
-LIBS = -lm -lGL -lGLU -lglut
+LIBS = -lm -lGL -lglut
 
 ifeq ($(shell uname -o),Cygwin)
-	LIBS = -lm -lopengl32 -lglu32 -lglut32
+	LIBS = -lm -lopengl32 -lglut32
 	LDFLAGS += -static-libgcc
 endif
 

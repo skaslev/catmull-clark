@@ -13,7 +13,7 @@ static vector center = { 0.0, 0.0, 0.0 };
 static float focal_len = 5.0f;
 static float y_rot = 0.0f, x_rot = 0.0f;
 
-static float fovy  = 90.0f;
+static float fovy  = 60.0f;
 static float znear = 0.1f, zfar = 1000.0f;
 static GLint width = 960, height = 960;
 
@@ -28,7 +28,7 @@ static void focus_camera(const struct mesh *mesh)
 	mesh_calc_bounds(mesh, min, max);
 	vec_add(center, min, max);
 	vec_mul(center, 0.5f, center);
-	focal_len = 4.0f * max[1];
+	focal_len = 6.0f * max[1];
 }
 
 static void get_camera_frame(vector x, vector y, vector z)
@@ -68,8 +68,8 @@ static void display(void)
 
 	/* Render scene */
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fovy, (double) width / height, znear, zfar);
+	mat_persp(m, fovy, (double) width / height, znear, zfar);
+	glLoadMatrixf(m);
 	glMatrixMode(GL_MODELVIEW);
 	get_camera(eye, at, up);
 	mat_lookat(m, eye, at, up);
