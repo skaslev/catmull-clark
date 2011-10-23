@@ -3,6 +3,10 @@ CFLAGS = -O3 -Wall -Winline
 AR = ar
 LIBS = -lm -lGL -lglut
 
+ifeq ($(shell uname),Darwin)
+	LIBS = -lm -framework OpenGL -framework GLUT
+endif
+
 ifeq ($(shell uname -o),Cygwin)
 	LIBS = -lm -lopengl32 -lglut32
 	LDFLAGS += -static-libgcc
