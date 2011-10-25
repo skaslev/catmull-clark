@@ -2,18 +2,18 @@ This is a school project demonstrating a simple implementation of
 Catmull-Clark subdivision algorithm.
 
 Demo control:
-Esc, Ctrl-Q			Exit
-Space				Switch to next object
-Backspace			Switch to previous object
-F				Focus camera on current object
-W				Toggle wireframe
-+/=				Show next subdivision level
--/_				Show previous subdivision level
+Esc, Ctrl-Q				Exit
+Space					Switch to next object
+Backspace				Switch to previous object
+F					Focus camera on current object
+W					Toggle wireframe
++/=					Show next subdivision level
+-/_					Show previous subdivision level
 
 Camera control:
-Alt-Left mouse button		Rotate camera
-Alt-Middle mouse button		Pan camera
-Alt-Right mouse button		Zoom camera
+Left click				Rotate camera
+Middle click or Ctrl-Right click	Pan camera
+Right click				Zoom camera
 
 Homepage: http://github.com/skaslev/catmull-clark/
 Author: Slavomir Kaslev <slavomir.kaslev@gmail.com>

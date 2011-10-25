@@ -109,7 +109,7 @@ static void reshape(int w, int h)
 static void keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 27: case 17:
+	case 27: case 17:	/* Esc or Ctrl-Q */
 		exit(0);
 		break;
 	case 'f': case 'F':
@@ -126,7 +126,7 @@ static void keyboard(unsigned char key, int x, int y)
 			ed_next_obj(ed);
 			focus_camera(ed_cur_obj(ed));
 			break;
-		case 8:			/* Backspace */
+		case 8:	case 127:	/* Backspace or Delete */
 			ed_prev_obj(ed);
 			focus_camera(ed_cur_obj(ed));
 			break;
