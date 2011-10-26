@@ -143,12 +143,6 @@ static void keyboard(unsigned char key, int x, int y)
 	}
 }
 
-static void special(int key, int x, int y)
-{
-	if ((glutGetModifiers() & GLUT_ACTIVE_ALT) && key == GLUT_KEY_F4)
-		exit(0);
-}
-
 static void mouse(int button, int state, int x, int y)
 {
 	static const int cursor[] = {
@@ -161,7 +155,7 @@ static void mouse(int button, int state, int x, int y)
 	if (state == GLUT_DOWN) {
 		if (button == GLUT_LEFT_BUTTON)
 			cur_op = ROTATING;
-		else if (button == GLUT_MIDDLE_BUTTON || (glutGetModifiers() & GLUT_ACTIVE_CTRL))
+		else if (button == GLUT_MIDDLE_BUTTON || glutGetModifiers())
 			cur_op = PANNING;
 		else if (button == GLUT_RIGHT_BUTTON)
 			cur_op = ZOOMING;
@@ -218,7 +212,6 @@ int main(int argc, char **argv)
 	glutReshapeFunc(reshape);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
-	glutSpecialFunc(special);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glutIdleFunc(idle);
