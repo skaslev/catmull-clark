@@ -4,16 +4,17 @@
 #include <math.h>
 #include <string.h>
 
-#define M_PIf		((float) M_PI)
+#define PI		((float) M_PI)
+#define TAU		(2.0f * PI)
 
 static inline float degrees(float rad)
 {
-	return rad * 180.0f / M_PIf;
+	return rad * 360.0f / TAU;
 }
 
 static inline float radians(float deg)
 {
-	return deg * M_PIf / 180.0f;
+	return deg * TAU / 360.0f;
 }
 
 static inline float sqrf(float a)
@@ -38,7 +39,7 @@ static inline float maxf(float a, float b)
 
 static inline float mixf(float a, float b, float t)
 {
-	return t * a + (1.0f - t) * b;
+	return (1.0f - t) * a + t * b;
 }
 
 /* Vector operations */
@@ -159,7 +160,7 @@ static inline void vec_to_spherical(const vector r, float *phi, float *theta)
 	*theta = acosf(r[2]);
 	*phi = atan2f(r[1], r[0]);
 	if (*phi < 0.0f)
-		*phi += 2.0f * M_PIf;
+		*phi += 2.0f * PI;
 }
 
 /* Matrix operations */

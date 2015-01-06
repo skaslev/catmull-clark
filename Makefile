@@ -1,4 +1,4 @@
-CC = gcc
+CC = cc
 CFLAGS = -O3 -Wall -Winline
 AR = ar
 LIBS = -lm -lGL -lglut
