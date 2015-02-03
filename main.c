@@ -152,12 +152,14 @@ static void mouse(int button, int state, int x, int y)
 		GLUT_CURSOR_UP_DOWN			/* ZOOMING */
 	};
 
+	int mods = glutGetModifiers();
+	int alt = mods & GLUT_ACTIVE_ALT;
 	if (state == GLUT_DOWN) {
-		if (button == GLUT_LEFT_BUTTON)
+		if (alt && button == GLUT_LEFT_BUTTON)
 			cur_op = ROTATING;
-		else if (button == GLUT_RIGHT_BUTTON)
+		else if (alt && button == GLUT_RIGHT_BUTTON)
 			cur_op = ZOOMING;
-		else if (button == GLUT_MIDDLE_BUTTON || glutGetModifiers())
+		else if (mods || button == GLUT_MIDDLE_BUTTON)
 			cur_op = PANNING;
 	} else {
 		cur_op = NONE;

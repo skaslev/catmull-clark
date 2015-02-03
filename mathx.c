@@ -141,15 +141,17 @@ void mat_lookat(matrix r, const vector eye, const vector at, const vector up)
 void mat_frame(matrix r, const vector o, const vector x, const vector y, const vector z)
 {
 	vector p;
-	matrix m;
+	float a, b, c;
 
-	mat_identity(r);
-	R(0,0) = x[0]; R(0,1) = x[1]; R(0,2) = x[2];
-	R(1,0) = y[0]; R(1,1) = y[1]; R(1,2) = y[2];
-	R(2,0) = z[0]; R(2,1) = z[1]; R(2,2) = z[2];
 	vec_neg(p, o);
-	mat_translate(m, p);
-	mat_mul(r, r, m);
+	a = vec_dot(p, x);
+	b = vec_dot(p, y);
+	c = vec_dot(p, z);
+
+	R(0,0) = x[0]; R(0,1) = x[1]; R(0,2) = x[2]; R(0, 3) = a;
+	R(1,0) = y[0]; R(1,1) = y[1]; R(1,2) = y[2]; R(1, 3) = b;
+	R(2,0) = z[0]; R(2,1) = z[1]; R(2,2) = z[2]; R(2, 3) = c;
+	R(3,0) = 0.0f; R(3,1) = 0.0f; R(3,2) = 0.0f; R(3, 3) = 1.0f;
 }
 
 void mat_frustum(matrix r, float left, float right, float bot, float top, float near, float far)
