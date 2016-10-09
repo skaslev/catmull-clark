@@ -12,7 +12,7 @@ W					Toggle wireframe
 
 Camera control:
 Left click				Rotate camera
-Middle click or Ctrl-Right click	Pan camera
+Middle click				Pan camera
 Right click				Zoom camera
 
 Homepage: http://github.com/skaslev/catmull-clark/
