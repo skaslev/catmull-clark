@@ -14,7 +14,7 @@
 #define buf_foreach(it, a)	for ((it) = (a); (it) < (a) + buf_len(a); (it)++)
 
 /* Private */
-#define buf_raw_(a)		((int *) (a) - 2)
+#define buf_raw_(a)		((size_t *) (a) - 2)
 #define buf_m_(a)		(buf_raw_(a)[0])
 #define buf_n_(a)		(buf_raw_(a)[1])
 
@@ -23,6 +23,6 @@
 				 buf_n_(a) == buf_m_(a) ? buf_realloc_(a, 2 * buf_m_(a)) : (void) 0)
 #define buf_realloc_(a, n)	buf_do_realloc_((void **) &(a), n, sizeof(*(a)))
 
-void buf_do_realloc_(void **a, int nr, int sz);
+void buf_do_realloc_(void **a, size_t nr, size_t sz);
 
 #endif
