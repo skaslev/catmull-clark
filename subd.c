@@ -252,7 +252,7 @@ static void sd_do_iteration(struct sd_mesh *sd, int first_iteration, int last_it
 		buf_foreach(fi, v->fs)
 			vec_add(p, p, sd_v(sd_f(*fi).fvert).p);
 		vec_mad(v->newp, 1.0f / (n * n), p);
-		
+
 		vec_zero(p);
 		buf_foreach(ei, v->es)
 			vec_add(p, p, sd_edge_other(sd, &sd_e(*ei), v)->p);
