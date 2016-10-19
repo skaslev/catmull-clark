@@ -23,7 +23,6 @@ struct sd_edge {
 };
 
 struct sd_mesh {
-	int first_iteration;
 	struct sd_vert *verts;
 	struct sd_face *faces;
 	struct sd_edge *edges;
@@ -109,8 +108,7 @@ static struct sd_mesh *sd_init(const struct mesh *mesh)
 	struct sd_vert *v;
 	struct sd_mesh *sd;
 
-	sd = malloc(sizeof(struct sd_mesh));
-	sd->first_iteration = 1;
+	sd = malloc(sizeof(*sd));
 	sd->verts = NULL;
 	sd->faces = NULL;
 	sd->edges = NULL;
@@ -181,7 +179,7 @@ static int sd_add_vert(struct sd_mesh *sd, vector p)
 	return buf_len(sd->verts) - 1;
 }
 
-static void sd_do_iteration(struct sd_mesh *sd, int last_iteration)
+static void sd_do_iteration(struct sd_mesh *sd, int first_iteration, int last_iteration)
 {
 	int V, F, E, Vn, Fn, En;
 	struct sd_face *faces = NULL;
@@ -198,11 +196,10 @@ static void sd_do_iteration(struct sd_mesh *sd, int last_iteration)
 	F = buf_len(sd->faces);
 	E = buf_len(sd->edges);
 	Vn = V + F + E;
-	if (sd->first_iteration) {
+	if (first_iteration) {
 		Fn = 0;
 		buf_foreach(f, sd->faces)
 			Fn += buf_len(f->vs);
-		sd->first_iteration = 0;
 	} else {
 		/* After the first iteration all faces are quads */
 		Fn = 4 * F;
@@ -326,12 +323,14 @@ static struct mesh *sd_convert(struct sd_mesh *sd)
 
 struct mesh *subdivide(const struct mesh *mesh, int iterations)
 {
+	int i;
 	struct sd_mesh *sd;
 	struct mesh *ret;
 
 	sd = sd_init(mesh);
-	while (iterations--)
-		sd_do_iteration(sd, iterations == 0);
+	for (i = 0; i < iterations; i++) {
+		sd_do_iteration(sd, i == 0, i + 1 == iterations);
+	}
 	ret = sd_convert(sd);
 	sd_destroy(sd);
 	return ret;
@@ -345,7 +344,7 @@ void subdivide_levels(const struct mesh *mesh,
 
 	sd = sd_init(mesh);
 	for (i = 0; i < nr_levels; i++) {
-		sd_do_iteration(sd, i == nr_levels - 1);
+		sd_do_iteration(sd, i == 0, i + 1 == nr_levels);
 		levels[i] = sd_convert(sd);
 	}
 	sd_destroy(sd);

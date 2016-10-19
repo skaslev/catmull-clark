@@ -30,7 +30,7 @@ struct editor {
 struct editor *ed_create()
 {
 	struct editor *ed;
-	ed = malloc(sizeof(struct editor));
+	ed = malloc(sizeof(*ed));
 	ed->objs = NULL;
 	ed->cur_obj = 0;
 	ed->wireframe = 0;
