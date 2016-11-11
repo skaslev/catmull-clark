@@ -5,7 +5,7 @@
  * Mesh construction
  */
 struct mesh *mesh_create(void);
-void mesh_destroy(struct mesh *mesh);
+void mesh_free(struct mesh *mesh);
 
 void mesh_add_vertex(struct mesh *mesh, const float *v);
 void mesh_add_normal(struct mesh *mesh, const float *n);

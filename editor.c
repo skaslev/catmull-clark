@@ -60,7 +60,7 @@ void ed_add_obj(struct editor *ed, const char *file, int nr_levels)
 		ed_obj.stats[i+1].vs = mesh_vertex_buffer(levels[i], NULL);
 		ed_obj.stats[i+1].fs = mesh_face_count(levels[i]);
 		mesh_compile_list(levels[i], ed_obj.lists + i + 1);
-		mesh_destroy(levels[i]);
+		mesh_free(levels[i]);
 	}
 
 	buf_push(ed->objs, ed_obj);
@@ -115,7 +115,7 @@ void ed_toggle_editing(struct editor *ed)
 		ed_obj->cur_level = 2;
 		mesh = subdivide(ed_obj->mesh, ed_obj->cur_level);
 		mesh_compile_list(mesh, ed_obj->lists + ed_obj->cur_level);
-		mesh_destroy(mesh);
+		mesh_free(mesh);
 	} else {
 		int i;
 		struct mesh *levels[MAX_LEVELS];
@@ -124,7 +124,7 @@ void ed_toggle_editing(struct editor *ed)
 		subdivide_levels(ed_obj->mesh, levels, ed_obj->nr_levels - 1);
 		for (i = 0; i < ed_obj->nr_levels - 1; i++) {
 			mesh_compile_list(levels[i], ed_obj->lists + i + 1);
-			mesh_destroy(levels[i]);
+			mesh_free(levels[i]);
 		}
 	}
 }

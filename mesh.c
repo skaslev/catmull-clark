@@ -25,7 +25,7 @@ struct mesh *mesh_create(void)
 	return mesh;
 }
 
-void mesh_destroy(struct mesh *mesh)
+void mesh_free(struct mesh *mesh)
 {
 	if (!mesh)
 		return;

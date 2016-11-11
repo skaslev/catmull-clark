@@ -149,7 +149,7 @@ static struct sd_mesh *sd_init(const struct mesh *mesh)
 	return sd;
 }
 
-static void sd_destroy(struct sd_mesh *sd)
+static void sd_free(struct sd_mesh *sd)
 {
 	struct sd_vert *v;
 	struct sd_face *f;
@@ -332,7 +332,7 @@ struct mesh *subdivide(const struct mesh *mesh, int iterations)
 		sd_do_iteration(sd, i == 0, i + 1 == iterations);
 	}
 	ret = sd_convert(sd);
-	sd_destroy(sd);
+	sd_free(sd);
 	return ret;
 }
 
@@ -347,5 +347,5 @@ void subdivide_levels(const struct mesh *mesh,
 		sd_do_iteration(sd, i == 0, i + 1 == nr_levels);
 		levels[i] = sd_convert(sd);
 	}
-	sd_destroy(sd);
+	sd_free(sd);
 }
