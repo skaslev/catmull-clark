@@ -1,6 +1,11 @@
 This is a school project demonstrating a simple implementation of the
 Catmull-Clark subdivision algorithm.
 
+Build instructions:
+- Ensure dependencies are installed: GLUT development headers, make.
+- Download the source code and navigate into the directory
+- Run make
+
 Demo control:
 Esc / Ctrl-Q				Exit
 Space					Switch to next object
