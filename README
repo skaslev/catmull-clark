@@ -1,14 +1,19 @@
-This is a school project demonstrating a simple implementation of
+This is a school project demonstrating a simple implementation of the
 Catmull-Clark subdivision algorithm.
 
+Build instructions:
+- Ensure dependencies are installed: GLUT development headers, make.
+- Download the source code and navigate into the directory
+- Run make
+
 Demo control:
-Esc, Ctrl-Q				Exit
-Space					Switch to next object
-Backspace				Switch to previous object
+Esc / Ctrl-Q				Exit
+Space / Right				Switch to next object
+Backspace / Left			Switch to previous object
 F					Focus camera on current object
 W					Toggle wireframe
-+/=					Show next subdivision level
--/_					Show previous subdivision level
++ / = / Up				Show next subdivision level
+- / _ / Down				Show previous subdivision level
 
 Camera control:
 Left click				Rotate camera
