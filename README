@@ -1,14 +1,14 @@
-This is a school project demonstrating a simple implementation of
+This is a school project demonstrating a simple implementation of the
 Catmull-Clark subdivision algorithm.
 
 Demo control:
-Esc, Ctrl-Q				Exit
+Esc / Ctrl-Q				Exit
 Space					Switch to next object
 Backspace				Switch to previous object
 F					Focus camera on current object
 W					Toggle wireframe
-+/=					Show next subdivision level
--/_					Show previous subdivision level
++ / =					Show next subdivision level
+- / _					Show previous subdivision level
 
 Camera control:
 Left click				Rotate camera
