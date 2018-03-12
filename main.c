@@ -143,25 +143,25 @@ static void keyboard(unsigned char key, int x, int y)
 	}
 }
 
-static void specialInput(int key, int x, int y)
+static void special(int key, int x, int y)
 {
-	if (!ed_is_editing(ed)) {
-		switch (key) {
-		case GLUT_KEY_RIGHT:
-			ed_next_obj(ed);
-			focus_camera(ed_cur_obj(ed));
-			break;
-		case GLUT_KEY_LEFT:
-			ed_prev_obj(ed);
-			focus_camera(ed_cur_obj(ed));
-			break;
-		case GLUT_KEY_UP:
-			ed_next_level(ed);
-			break;
-		case GLUT_KEY_DOWN:
-			ed_prev_level(ed);
-			break;
-		}
+	if (ed_is_editing(ed))
+		return;
+	switch (key) {
+	case GLUT_KEY_RIGHT:
+		ed_next_obj(ed);
+		focus_camera(ed_cur_obj(ed));
+		break;
+	case GLUT_KEY_LEFT:
+		ed_prev_obj(ed);
+		focus_camera(ed_cur_obj(ed));
+		break;
+	case GLUT_KEY_UP:
+		ed_next_level(ed);
+		break;
+	case GLUT_KEY_DOWN:
+		ed_prev_level(ed);
+		break;
 	}
 }
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 	glutReshapeFunc(reshape);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
-	glutSpecialFunc(specialInput);
+	glutSpecialFunc(special);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glutIdleFunc(idle);
