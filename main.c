@@ -147,6 +147,7 @@ static void special(int key, int x, int y)
 {
 	if (ed_is_editing(ed))
 		return;
+
 	switch (key) {
 	case GLUT_KEY_RIGHT:
 		ed_next_obj(ed);
