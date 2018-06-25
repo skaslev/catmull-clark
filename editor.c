@@ -49,6 +49,7 @@ void ed_add_obj(struct editor *ed, const char *file, int nr_levels)
 	ed_obj.nr_levels = nr_levels;
 	ed_obj.lists = glGenLists(nr_levels);
 	strncpy(ed_obj.file, file, sizeof(ed_obj.file));
+	ed_obj.file[sizeof(ed_obj.file) - 1] = '\0';
 	ed_obj.stats = NULL;
 	buf_resize(ed_obj.stats, nr_levels);
 
