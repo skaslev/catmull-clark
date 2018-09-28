@@ -19,6 +19,7 @@ Camera control:
 Left click				Rotate camera
 Middle click				Pan camera
 Right click				Zoom camera
+Ctrl-Left click				Pan camera
 
 Homepage: http://github.com/skaslev/catmull-clark/
 Author: Slavomir Kaslev <slavomir.kaslev@gmail.com>
