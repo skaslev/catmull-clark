@@ -15,7 +15,7 @@ static float y_rot = 0.0f, x_rot = 0.0f;
 
 static float fovy  = 60.0f;
 static float znear = 0.1f, zfar = 1000.0f;
-static GLint width = 960, height = 960;
+static GLint width = 1280, height = 736;
 
 static enum { NONE, ROTATING, PANNING, ZOOMING } cur_op = NONE;
 static int last_x, last_y;
